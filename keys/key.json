@@ -1,0 +1,11 @@
+{   
+    "admin":{
+        "account": "zd27083.us-east-2.aws",
+        "user": "HugoAsaga",
+        "password": "ansvpwSab8",
+        "role":"RL_POC",
+        "warehouse":"WH_POC",
+        "database":"UNIMED_STREAMLIT_SF",
+        "schema":"BLOB"
+        }
+}
