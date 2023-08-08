@@ -27,10 +27,10 @@ def adicionaColunaDiariaCti(session:Session,
     
     with open(parameterFile,"r", encoding="utf8") as f:
         params = json.loads(f.read())
-    
-    
+        print(params['cod_acomodacao_tiss'])
+
     query = f"""
-    SELECT  
+    SELECT
         A.*,
         CASE 
             WHEN COD_ACOMODACAO_TISS IN ({params['cod_acomodacao_tiss']}) THEN 'SIM'
@@ -40,6 +40,9 @@ def adicionaColunaDiariaCti(session:Session,
             ELSE 'NAO'
         END AS CTI_DIARIA
     FROM {schema}.{table} A
+    WHERE
+        COD_ACOMODACAO_TISS <> '6890427A1F51A3E7'
+        AND COD_ACOMODACAO_TISS_PEDIDO <> '6890427A1F51A3E7'
     """
     Utils.createSqlTableFromQuery(query, schema, outputTable, session)
 
@@ -50,4 +53,3 @@ def adicionaColunaDiariaCti(session:Session,
     #                                      GROUP BY CTI_DIARIA
     #                                      """).collect())
     # print(count)
-

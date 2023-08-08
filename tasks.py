@@ -65,7 +65,7 @@ def tasks_snow(session:Session):
         schema=schema,
         table="SEM_CARACT_ESPECIAIS",
         outputTable="TIPO_ATEND")
-    print("Tratamento 02")
+    print("Tratamento 02 concluido")
 
 
     geraIdPessoa(session=session,
@@ -78,13 +78,13 @@ def tasks_snow(session:Session):
                 "NUM_AGR_INTER",
                 "NUM_PEDIDO_INTER",
                 "COD_CONTROLE"])
-    print("Tratamento 03")
+    print("Tratamento 03 concluido")
 
     consolidaDatasDeNascimento(session=session,
                            schema=schema,
                            table="COM_ID_PESSOA",
                            outputTable="DT_NASC_CONSOLID")
-    print("Tratamento 04")
+    print("Tratamento 04 concluido")
 
 
     # # """erro"""

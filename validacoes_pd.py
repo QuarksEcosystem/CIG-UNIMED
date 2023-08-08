@@ -8,55 +8,79 @@ import inspect
 #Valida se o dataframe contém a quantidade minima de campos mandatórios preenchidos
 #def validate_completeness(df):
 
+def validate_date(value):
+    if pd.notnull(value) and re.match(r'\d{2}/\d{2}/\d{4}', value):
+        return pd.to_datetime(value, format='%d/%m/%Y', errors='coerce').strftime('%d/%m/%Y')
+    return ''
+
+
+def validate_string(value):
+    return isinstance(value, str)
+
+
+def validate_cid(value):
+    return re.match(r'^[A-Z]\d{2}$', value) is not None
+
+
+def validate_integer(value):
+    return isinstance(value, int)
+
+
+def validate_float(value):
+    return isinstance(value, float)
+
+
+def validate_uf(value):
+    return isinstance(value, str) and len(value) == 2
 
 
 def validation_rules_DataFrame(df):
     validation_rules = {
-        'COD_GUIA': lambda value: isinstance(value, int),
-        'DT_OCORR_EVENTO': lambda value: pd.to_datetime(value, format='%d/%m/%Y', errors='coerce').strftime('%d/%m/%Y') if pd.notnull(value) and re.match(r'\d{2}/\d{2}/\d{4}', value) else '',
-        'DT_INICIO_GUIA_INTERNACAO': lambda value: pd.to_datetime(value, format='%d/%m/%Y', errors='coerce').strftime('%d/%m/%Y') if pd.notnull(value) and re.match(r'\d{2}/\d{2}/\d{4}', value) else '',
-        'DT_FIM_GUIA_INTERNACAO': lambda value: pd.to_datetime(value, format='%d/%m/%Y', errors='coerce').strftime('%d/%m/%Y') if pd.notnull(value) and re.match(r'\d{2}/\d{2}/\d{4}', value) else '',
-        'TIPO_ATENDIMENTO': lambda value: isinstance(value, str),
-        'REGIME_DO_ATENDIMENTO': lambda value: isinstance(value, str),
-        'CARATER_CONTA_MEDICA': lambda value: isinstance(value, str),
-        'TP_ACOMODACAO': lambda value: isinstance(value, str),
-        'TIPO_ALTA': lambda value: isinstance(value, str),
-        'TIPO_INTERNACAO_CONTA': lambda value: isinstance(value, str),
-        'TIPO_REGIME': lambda value: isinstance(value, str),
-        'CID_GUIA': lambda value: re.match(r'^[A-Z]\d{2}$', value) is not None,
-        'CID_SAIDA': lambda value: re.match(r'^[A-Z]\d{2}$', value) is not None,
-        'CID_PRINC_ENTRADA': lambda value: re.match(r'^[A-Z]\d{2}$', value) is not None,
-        'CID_SEC_ENTRADA': lambda value: re.match(r'^[A-Z]\d{2}$', value) is not None,
-        'COD_ITEM_PROD_MEDICA': lambda value: isinstance(value, int),
-        'DS_PROD_MEDICA': lambda value: isinstance(value, str),
-        'TIPO_PROD_MEDICA': lambda value: isinstance(value, str),
-        'TIPO_TABELA': lambda value: isinstance(value, str),
-        'QTDE_PROD_MEDICA': lambda value: isinstance(value, int),
-        'VLR_PROD_MEDICA': lambda value: isinstance(value, float),
-        'COD_PRESTADOR_EXECUTANTE_PJ': lambda value: isinstance(value, int),
-        'DS_PRESTADOR_EXECUTANTE_PJ': lambda value: isinstance(value, str),
-        'NOME_TIPO_PRESTADOR_PJ': lambda value: isinstance(value, str),
-        'CIDADE_PRESTADOR_PJ': lambda value: isinstance(value, str),
-        'UF_PRESTADOR_PJ': lambda value: isinstance(value, str) and len(value) == 2,
-        'COD_UNIMED_PRESTADOR_EXC_PJ': lambda value: isinstance(value, int),
-        'TP_REDE_PJ': lambda value: isinstance(value, str),
-        'GRUPO_PRESTADOR_PJ': lambda value: isinstance(value, str),
-        'COD_CLIENTE': lambda value: isinstance(value, int),
-        'DT_NASCIMENTO_CLIENTE': lambda value: pd.to_datetime(value, format='%d/%m/%Y', errors='coerce').strftime('%d/%m/%Y') if pd.notnull(value) and re.match(r'\d{2}/\d{2}/\d{4}', value) else '',
-        'SEXO_CLIENTE': lambda value: isinstance(value, str),
-        'GENERO_CLIENTE': lambda value: isinstance(value, str),
-        'TP_PRODUTO': lambda value: isinstance(value, str),
-        'TP_CONTRATACAO': lambda value: isinstance(value, str), #and value in ['EMPRESARIAL', 'ADESAO', 'INDIVIDUAL'],
-        'CODIGO_ESTIPULANTE': lambda value: isinstance(value, int),
-        'ID_GRUPO_CLIENTE _EMPRESARIAL': lambda value: isinstance(value, int),
-        'CRM_EXECUTANTE': lambda value: isinstance(value, int),
-        'CONSELHO_EXECUTANTE': lambda value: isinstance(value, str),
-        'GP_EXECUTANTE': lambda value: isinstance(value, str),# and value in ['CIRURGIÃO', 'ANESTESISTA', 'AUXILIAR DO CIRURGIÃO', 'AUXILIAR DO ANESTESISTA'],
-        'UF_EXECUTANTE': lambda value: isinstance(value, str) and len(value) == 2,
-        'NOME_EXEC_AUTORIZACAO': lambda value: isinstance(value, str),
-        'CRM_SOLICITANTE': lambda value: isinstance(value, int),
-        'CONSELHO_SOLICITANTE': lambda value: isinstance(value, str),
-        'UF_SOLICITANTE': lambda value: isinstance(value, str) and len(value) == 2
+        'COD_GUIA': validate_integer,
+        'DT_OCORR_EVENTO': validate_date,
+        'DT_INICIO_GUIA_INTERNACAO': validate_date,
+        'DT_FIM_GUIA_INTERNACAO': validate_date,
+        'TIPO_ATENDIMENTO': validate_string,
+        'REGIME_DO_ATENDIMENTO': validate_string,
+        'CARATER_CONTA_MEDICA': validate_string,
+        'TP_ACOMODACAO': validate_string,
+        'TIPO_ALTA': validate_string,
+        'TIPO_INTERNACAO_CONTA': validate_string,
+        'TIPO_REGIME': validate_string,
+        'CID_GUIA': validate_cid,
+        'CID_SAIDA': validate_cid,
+        'CID_PRINC_ENTRADA': validate_cid,
+        'CID_SEC_ENTRADA': validate_cid,
+        'COD_ITEM_PROD_MEDICA': validate_integer,
+        'DS_PROD_MEDICA': validate_string,
+        'TIPO_PROD_MEDICA': validate_string,
+        'TIPO_TABELA': validate_string,
+        'QTDE_PROD_MEDICA': validate_integer,
+        'VLR_PROD_MEDICA': validate_float,
+        'COD_PRESTADOR_EXECUTANTE_PJ': validate_integer,
+        'DS_PRESTADOR_EXECUTANTE_PJ': validate_string,
+        'NOME_TIPO_PRESTADOR_PJ': validate_string,
+        'CIDADE_PRESTADOR_PJ': validate_string,
+        'UF_PRESTADOR_PJ': validate_uf,
+        'COD_UNIMED_PRESTADOR_EXC_PJ': validate_integer,
+        'TP_REDE_PJ': validate_string,
+        'GRUPO_PRESTADOR_PJ': validate_string,
+        'COD_CLIENTE': validate_integer,
+        'DT_NASCIMENTO_CLIENTE': validate_date,
+        'SEXO_CLIENTE': validate_string,
+        'GENERO_CLIENTE': validate_string,
+        'TP_PRODUTO': validate_string,
+        'TP_CONTRATACAO': validate_string, #and value in ['EMPRESARIAL', 'ADESAO', 'INDIVIDUAL'],
+        'CODIGO_ESTIPULANTE': validate_integer,
+        'ID_GRUPO_CLIENTE _EMPRESARIAL': validate_integer,
+        'CRM_EXECUTANTE': validate_integer,
+        'CONSELHO_EXECUTANTE': validate_string,
+        'GP_EXECUTANTE': validate_string,# and value in ['CIRURGIÃO', 'ANESTESISTA', 'AUXILIAR DO CIRURGIÃO', 'AUXILIAR DO ANESTESISTA'],
+        'UF_EXECUTANTE': validate_uf,
+        'NOME_EXEC_AUTORIZACAO': validate_string,
+        'CRM_SOLICITANTE': validate_integer,
+        'CONSELHO_SOLICITANTE': validate_string,
+        'UF_SOLICITANTE': validate_uf
     }
 
     # def apply_validation_rules(df, rules):

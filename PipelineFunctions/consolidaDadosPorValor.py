@@ -77,7 +77,7 @@ def consolidaDadosPorValor(session:Session,
              {aggregateColumn} AS {aggregateColumn}_CORRIGIDA,
              {aggregationUnit}
          FROM (
-                 (SELECT 
+                (SELECT 
                       {aggregationUnit},
                       {aggFunc}(CAST(REPLACE(REPLACE({valueColumn}, '.',''), ',', '.') AS float)
                                 ) AS {valueColumn}_{aggFunc}

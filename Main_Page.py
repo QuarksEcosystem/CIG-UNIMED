@@ -20,6 +20,7 @@ from itertools import cycle
 
 from streamlit_authenticator.hasher import Hasher
 from streamlit_authenticator.authenticate import Authenticate
+
 #import streamlit_authenticator as stauth
 if 'connection_established' not in st.session_state:
     st.session_state['connection_established'] = None
@@ -78,10 +79,11 @@ def validate_email(email: str) -> bool:
         """
         return "@" in email and 2 < len(email) < 320
 
-LENGTH_CNPJ = 14
+
 
 
 def validate_cnpj(cnpj: str) -> bool:
+    LENGTH_CNPJ = 14
     if len(cnpj) != LENGTH_CNPJ:
         return False
 
@@ -165,6 +167,7 @@ def show_login_section():
         
     
 with st.sidebar:
+    # Título da aplicação na Main Page
     st.title('Snowflake-Streamlit App')
     # Verifica se a conexão ainda não foi estabelecida ou se não está estabelecida
     if 'connection_established' not in st.session_state or not st.session_state.connection_established:
@@ -191,6 +194,7 @@ with st.sidebar:
 
 with st.container():
         # Verifica se a conexão foi estabelecida e se o usuário é 'admin'
+        ###Criar uma função para isso
         if 'connection_established' in st.session_state and st.session_state.connection_established:
             if pagina_selecionada == "Entrada de dados":
                     
@@ -207,7 +211,11 @@ with st.container():
                         # stringio = StringIO(uploaded_file.getvalue().decode("utf-8"))
                         # string_data = stringio.read()
                         # Carrega os dados em um DataFrame
-                        df = pd.read_csv(uploaded_file, sep=';', dtype={'COD_PREST': str}, nrows=100)
+
+                        ###Criar validação para checar o separador
+                        df = pd.read_csv(uploaded_file, sep=',', dtype={'COD_PREST': str}, nrows=5)
+                        df = df.loc[:, ~df.columns.str.contains('Unnamed: 0')]
+
                         # read = pd.read_csv(uploaded_file, chunksize=1000000, encoding='latin1', sep=';', dtype={'COD_PREST': str}, low_memory=False)
                         # Exibe o DataFrame
                         # for chunk in read:
@@ -267,4 +275,3 @@ with st.container():
                         file_name='data_frame.csv',
                         mime='text/csv'
                     )
-
