@@ -1,0 +1,21 @@
+cookie:
+  expiry_days: -1
+  key: some_signature_key
+  name: some_cookie_name
+credentials:
+  usernames:
+    galego:
+      email: giovani.henriques@triggo.ai
+      name: galego
+      password: $2b$12$llUnTjdJygxnea/.OJIBpu4C/wdx9HWpgySx3iZDT2YKm.qdtJeS.
+    giovani:
+      email: giovani@gmail.com
+      name: giovani
+      password: $2b$12$D6HK3pI7M17cAAhRZm3YVuJEaQURzy.bQF34muNRlPF79pmwMnVji
+    unio_tocantis:
+      email: unio_tocantis@faculdade.com
+      name: unio_tocantis
+      password: $2b$12$spVfe1Eu8x8HUP/AvA8WuO3Odh3n1nhwsAAODo84chr.6CpU26B4G
+preauthorized:
+  emails:
+  - melsby@gmail.com

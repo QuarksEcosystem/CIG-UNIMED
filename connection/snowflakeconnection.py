@@ -12,6 +12,13 @@ def connection(sessionDataFilePath:json):
     session.sql(f"""USE SCHEMA BLOB;""").collect()
     return session
 
+def connection_report(sessionDataFilePath:json):
+    session = Session.builder.configs(sessionDataFilePath).create()
+    session.sql(f"""USE WAREHOUSE WH_POC;""").collect()
+    session.sql(f"""USE DATABASE UNIMED_STREAMLIT_SF""").collect()
+    session.sql(f"""USE SCHEMA STATA;""").collect()
+    return session
+
 def castInvalidFormats(df: pd.DataFrame):
     df_i = df.copy()
     for c in df.columns:
@@ -118,7 +125,11 @@ def verif_insert_table(df : pd.DataFrame,
         print(session.sql(f"""SELECT COUNT(*) AS LineCount FROM {database}.{schema}.{outputTableName};""").collect())
         
 def consulta_snow(session : Session):
-    query = f"""SELECT * FROM UNIMED_STREAMLIT_SF.BLOB.DADOS_REINTERNACAO"""
+    query = f"""SELECT * FROM UNIMED_STREAMLIT_SF.STATA.AMOSTRA_RETORNO LIMIT 10"""
     value = pd.DataFrame(session.sql(query).collect())
 
     return value
+
+def send_email_to_unimed(session : Session):
+    send_email = session.call("SEND_EMAIL_NOTIFICATION")
+    return send_email
