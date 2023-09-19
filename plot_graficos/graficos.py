@@ -22,27 +22,22 @@ from streamlit_authenticator.authenticate import Authenticate
 from Main_Page import load_data, dados_snow
 
 
-def tipo_de_rede(user):
-    user = dados_snow('report')
-    _session = connection_report(user)
-    df_full = load_data(_session)
-    df = df_full.group_by('TP_REDE_VIDAS').agg(pl.col('CUSTO_POTENCIAL').sum())
-    fig = px.bar(df,x='TP_REDE_VIDAS',y='CUSTO_POTENCIAL',text_auto=True)
+def tipo_de_rede(dataframe):
+    df = dataframe.group_by('TP_REDE_VIDAS', as_index=False)[['CUSTO_POTENCIAL']].sum()
+    fig = px.bar(df, x='TP_REDE_VIDAS', y='CUSTO_POTENCIAL', orientation='h', text_auto=True)
     return fig
 
 
-def tipo_acomodacao():
-    user = dados_snow('report')
-    _session = connection_report(user)
-    df_full = load_data(_session)
-    df = df_full.group_by('TP_ACOMODACAO_CIG').agg(pl.count().alias('QTD POR ACOMODAÇÃO'))
-    fig = px.bar(df,x='TP_ACOMODACAO_CIG',y='QTD POR ACOMODAÇÃO',text_auto=True)
+def tipo_acomodacao(dataframe):
+    df = dataframe.group_by('TP_ACOMODACAO_CIG', as_index=False)[['ID_PESSOA']].count()
+    df = dataframe.rename({'ID_PESSOA':'Quantidade'})
+    fig = px.pie(df)
     return fig
 
-def custo_total():
-    user = dados_snow('report')
-    _session = connection_report(user)
-    df_full = load_data(_session)
-    df = df_full['CUSTO_POTENCIAL'].agg(pl.sum()).to_pandas()['sum']
-    fig = px.bar(x=['CUSTO_POTENCIAL'],y=df,text_auto=True)
-    return fig
+# def custo_total():
+#     user = dados_snow('report')
+#     _session = connection_report(user)
+#     df_full = load_data(_session)
+#     df = df_full['CUSTO_POTENCIAL'].agg(pl.sum()).to_pandas()['sum']
+#     fig = px.bar(x=['CUSTO_POTENCIAL'],y=df,text_auto=True)
+#     return fig

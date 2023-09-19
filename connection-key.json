@@ -1,9 +1,9 @@
 {
     "account": "zd27083.us-east-2.aws",
-    "user": "GIOVANIGALEGO",
-    "password": "Giov@ni96@Snow",
+    "user": "GUSTAVOCIRILO",
+    "password": "41593055Gu@",
     "role":"RL_POC",
     "warehouse":"WH_POC",
     "database":"UNIMED_STREAMLIT_SF",
-    "schema":"BLOB"
+    "schema":"STATA"
 }

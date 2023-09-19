@@ -12,6 +12,10 @@ credentials:
       email: giovani@gmail.com
       name: giovani
       password: $2b$12$D6HK3pI7M17cAAhRZm3YVuJEaQURzy.bQF34muNRlPF79pmwMnVji
+    gustavo:
+      email: gustavo.latorre@triggo.ai
+      name: Gustavo Cirilo Juan Macario Latorre Silva
+      password: $2b$12$Y6486gSHyRPWu81mE/wqaOMvhdsnmH4jRr2k/wMOZdqzpjKJxIKou
     unio_tocantis:
       email: unio_tocantis@faculdade.com
       name: unio_tocantis
