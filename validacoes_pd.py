@@ -36,7 +36,7 @@ def validate_uf(value):
 
 def validation_rules_DataFrame(df):
     validation_rules = {
-        'COD_GUIA': validate_integer,
+        'COD_GUIA': validate_string,
         'DT_OCORR_EVENTO': validate_date,
         'DT_INICIO_GUIA_INTERNACAO': validate_date,
         'DT_FIM_GUIA_INTERNACAO': validate_date,
@@ -51,36 +51,37 @@ def validation_rules_DataFrame(df):
         'CID_SAIDA': validate_cid,
         'CID_PRINC_ENTRADA': validate_cid,
         'CID_SEC_ENTRADA': validate_cid,
-        'COD_ITEM_PROD_MEDICA': validate_integer,
+        'COD_ITEM_PROD_MEDICA': validate_string,
         'DS_PROD_MEDICA': validate_string,
         'TIPO_PROD_MEDICA': validate_string,
         'TIPO_TABELA': validate_string,
-        'QTDE_PROD_MEDICA': validate_integer,
+        'QTDE_PROD_MEDICA': validate_string,
         'VLR_PROD_MEDICA': validate_float,
-        'COD_PRESTADOR_EXECUTANTE_PJ': validate_integer,
+        'COD_PRESTADOR_EXECUTANTE_PJ': validate_string,
         'DS_PRESTADOR_EXECUTANTE_PJ': validate_string,
         'NOME_TIPO_PRESTADOR_PJ': validate_string,
         'CIDADE_PRESTADOR_PJ': validate_string,
         'UF_PRESTADOR_PJ': validate_uf,
-        'COD_UNIMED_PRESTADOR_EXC_PJ': validate_integer,
+        'COD_UNIMED_PRESTADOR_EXC_PJ': validate_string,
         'TP_REDE_PJ': validate_string,
         'GRUPO_PRESTADOR_PJ': validate_string,
-        'COD_CLIENTE': validate_integer,
+        'COD_CLIENTE': validate_string,
         'DT_NASCIMENTO_CLIENTE': validate_date,
         'SEXO_CLIENTE': validate_string,
         'GENERO_CLIENTE': validate_string,
         'TP_PRODUTO': validate_string,
         'TP_CONTRATACAO': validate_string, #and value in ['EMPRESARIAL', 'ADESAO', 'INDIVIDUAL'],
-        'CODIGO_ESTIPULANTE': validate_integer,
-        'ID_GRUPO_CLIENTE _EMPRESARIAL': validate_integer,
-        'CRM_EXECUTANTE': validate_integer,
+        'CODIGO_ESTIPULANTE': validate_string,
+        'ID_GRUPO_CLIENTE _EMPRESARIAL': validate_string,
+        'CRM_EXECUTANTE': validate_string,
         'CONSELHO_EXECUTANTE': validate_string,
         'GP_EXECUTANTE': validate_string,# and value in ['CIRURGIÃO', 'ANESTESISTA', 'AUXILIAR DO CIRURGIÃO', 'AUXILIAR DO ANESTESISTA'],
         'UF_EXECUTANTE': validate_uf,
         'NOME_EXEC_AUTORIZACAO': validate_string,
-        'CRM_SOLICITANTE': validate_integer,
+        'CRM_SOLICITANTE': validate_string,
         'CONSELHO_SOLICITANTE': validate_string,
-        'UF_SOLICITANTE': validate_uf
+        'UF_SOLICITANTE': validate_uf,
+        'CLIENTE': validate_string
     }
 
     # def apply_validation_rules(df, rules):
@@ -92,7 +93,7 @@ def validation_rules_DataFrame(df):
     #     return df[is_valid] '%d/%m/%Y'
     
     expected_types = {
-        'COD_GUIA': int,
+        'COD_GUIA': str,
         'DT_OCORR_EVENTO': '%d/%m/%Y',
         'DT_INICIO_GUIA_INTERNACAO': '%d/%m/%Y',
         'DT_FIM_GUIA_INTERNACAO': '%d/%m/%Y',
@@ -107,36 +108,37 @@ def validation_rules_DataFrame(df):
         'CID_SAIDA': str,
         'CID_PRINC_ENTRADA': str,
         'CID_SEC_ENTRADA': str,
-        'COD_ITEM_PROD_MEDICA': int,
+        'COD_ITEM_PROD_MEDICA': str,
         'DS_PROD_MEDICA': str,
         'TIPO_PROD_MEDICA': str,
         'TIPO_TABELA': str,
-        'QTDE_PROD_MEDICA': int,
-        'VLR_PROD_MEDICA': float,
-        'COD_PRESTADOR_EXECUTANTE_PJ': int,
+        'QTDE_PROD_MEDICA': str,
+        'VLR_PROD_MEDICA': str,
+        'COD_PRESTADOR_EXECUTANTE_PJ': str,
         'DS_PRESTADOR_EXECUTANTE_PJ': str,
         'NOME_TIPO_PRESTADOR_PJ': str,
         'CIDADE_PRESTADOR_PJ': str,
         'UF_PRESTADOR_PJ': str,
-        'COD_UNIMED_PRESTADOR_EXC_PJ': int,
+        'COD_UNIMED_PRESTADOR_EXC_PJ': str,
         'TP_REDE_PJ': str,
         'GRUPO_PRESTADOR_PJ': str,
-        'COD_CLIENTE': int,
+        'COD_CLIENTE': str,
         'DT_NASCIMENTO_CLIENTE': '%d/%m/%Y',
         'SEXO_CLIENTE': str,
         'GENERO_CLIENTE': str,
         'TP_PRODUTO': str,
         'TP_CONTRATACAO': str,
-        'CODIGO_ESTIPULANTE': int,
-        'ID_GRUPO_CLIENTE _EMPRESARIAL': int,
-        'CRM_EXECUTANTE': int,
+        'CODIGO_ESTIPULANTE': str,
+        'ID_GRUPO_CLIENTE _EMPRESARIAL': str,
+        'CRM_EXECUTANTE': str,
         'CONSELHO_EXECUTANTE': str,
         'GP_EXECUTANTE': str,
         'UF_EXECUTANTE': str,
         'NOME_EXEC_AUTORIZACAO': str,
-        'CRM_SOLICITANTE': int,
+        'CRM_SOLICITANTE': str,
         'CONSELHO_SOLICITANTE': str,
-        'UF_SOLICITANTE': str
+        'UF_SOLICITANTE': str,
+        'CLIENTE': str
     }
 
 
@@ -302,6 +304,7 @@ def checa_completude(df):
         'COD_ENT_TS_PREST': 0.0,#?
         'COD_PRESTADOR': 1.0,
         'NR_CNPJ': 0.0,#?
+        'CLIENTE': 0.0,#?
     }
     print()
     data = df.replace({'.': np.nan, 'None': np.nan, ' ': np.nan, '': np.nan})

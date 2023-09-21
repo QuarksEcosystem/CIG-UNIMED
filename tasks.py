@@ -236,13 +236,13 @@ def tasks_snow(session:Session):
     print('Tratamento 17 concluido ')
     
     
-    traduzirNomesDasColunas( session=session,
-                         database=database,
-                         schema=schema,
-                         table="Postulantes",
-                         outputTable="tabCiGSnowflake",
-                         arquivoDeTraducao="./traducao/traducaoSeguros.json")
-    print('Tratamento 18 concluido ')
+    # traduzirNomesDasColunas( session=session,
+    #                      database=database,
+    #                      schema=schema,
+    #                      table="Postulantes",
+    #                      outputTable="tabCiGSnowflake",
+    #                      arquivoDeTraducao="./traducao/traducaoSeguros.json")
+    # print('Tratamento 18 concluido ')
     
     
     

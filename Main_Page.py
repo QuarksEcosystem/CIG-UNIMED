@@ -6,11 +6,12 @@ import plotly.express as px
 # import re
 # import validators
 import time
+import datetime
 import json
 import yaml
 # from plot_graficos.graficos import tipo_de_rede, tipo_acomodacao, custo_total
 # import streamlit.components.v1 as components
-from connection.snowflakeconnection import connection, connection_report, uploadToSnowflake,verif_insert_table,consulta_snow,updateUserHistory, send_email_to_unimed
+from connection.snowflakeconnection import connection, connection_report, uploadToSnowflake,verif_insert_table,consulta_snow,updateUserHistory
 from tasks import tasks_snow
 from PIL import Image
 # import base64
@@ -256,10 +257,11 @@ def create_session_object():
 
 
 @st.cache_data
-def load_data(_session):
+def load_data(_session, cliente):
     _session = connection_report(user)
     # cliente = st.session_state['name']
-    snow_df = _session.table('CORTADA_AMOSTRA_RETORNO')
+    snow_df = _session.table('AMOSTRA_RETORNO')
+    snow_df = snow_df.filter(col("CLIENTE") == cliente)
     pl_df = pl.from_pandas(snow_df.to_pandas())
     return pl_df
 
@@ -271,11 +273,12 @@ def login(session_login):
         username = st.text_input("Username")
         password = st.text_input("Password", type="password")
         submit_button = st.form_submit_button(label='Login')
-
     if submit_button:
         st.session_state['login_username'] = session_login.sql(f"SELECT USERNAME FROM UNIMED_STREAMLIT_SF.STATA.ENCRYPTED_USERS WHERE USERNAME = '{username.upper()}';").collect()
         st.session_state['login_password'] = session_login.sql(f"SELECT TO_VARCHAR(DECRYPT(PASSWORD, '{passphrase}'), 'utf-8') FROM UNIMED_STREAMLIT_SF.STATA.ENCRYPTED_USERS WHERE USERNAME = '{username.upper()}';").collect()
         st.session_state['login_name'] = session_login.sql(f"SELECT NAME FROM UNIMED_STREAMLIT_SF.STATA.ENCRYPTED_USERS WHERE USERNAME = '{username.upper()}';").collect()
+        st.session_state['email'] = session_login.sql(f"SELECT EMAIL FROM UNIMED_STREAMLIT_SF.STATA.ENCRYPTED_USERS WHERE USERNAME = '{username.upper()}';").collect()
+        st.session_state['cliente'] = session_login.sql(f"SELECT CLIENTE FROM UNIMED_STREAMLIT_SF.STATA.ENCRYPTED_USERS WHERE USERNAME = '{username.upper()}';").collect()
         if len(st.session_state['login_username']) == 0:
             st.warning('Usuário não existe') 
             time.sleep(3)
@@ -336,6 +339,12 @@ def evolucao_custo_medio(dataframe):
     return fig
 
 
+def send_email_to_unimed(session : Session):
+    user_email = st.session_state['email'][0][0]
+    user_cliente = st.session_state['cliente'][0][0]
+    send_email = session.call("SEND_EMAIL_NOTIFICATION",user_email,user_cliente,datetime.datetime.now())    
+    return send_email
+
 session_login = create_session_object()
 
 if 'connection_established' not in st.session_state or not st.session_state.connection_established:
@@ -394,8 +403,9 @@ elif 'connection_established' in st.session_state:
                             # Carrega os dados em um DataFrame
 
                             ###Criar validação para checar o separador
-                            df = pd.read_csv(uploaded_file, sep=',', dtype={'COD_PREST': str}, nrows=5)
+                            df = pd.read_csv(uploaded_file, sep=',', dtype={'COD_PREST': str})
                             df = df.loc[:, ~df.columns.str.contains('Unnamed: 0')]
+                            df['CLIENTE'] = st.session_state['cliente'][0][0]
 
                             # read = pd.read_csv(uploaded_file, chunksize=1000000, encoding='latin1', sep=';', dtype={'COD_PREST': str}, low_memory=False)
                             # Exibe o DataFrame
@@ -403,7 +413,7 @@ elif 'connection_established' in st.session_state:
                                     # Processa cada chunk conforme necessário
                                 # (exemplo: realizar operações, transformações, etc.)
                                 # Exemplo simples: imprimir o chunk
-                            st.dataframe(df)
+                            st.dataframe(df.head(10))
                                 # break
                             # Define o modo de inserção como 'Append'
                             Mode = 'Append'
@@ -451,8 +461,9 @@ elif 'connection_established' in st.session_state:
                     # Estabelece a sessão de conexão com o Snowflake
                     st.write(st.session_state['login_name'][0][0])
                     session = connection(user)
-                    df = consulta_snow(session)
-                    st.dataframe(df, height=900)
+                    cliente = st.session_state['cliente'][0][0]
+                    df = consulta_snow(session,cliente)
+                    st.dataframe(df.head(10))
                     st.download_button(
                             label='Download',
                             data=df.to_csv().encode('utf-8'),
@@ -463,7 +474,7 @@ elif 'connection_established' in st.session_state:
                     user = dados_snow('report')
                     session = connection_report(user)
 
-                    dados = load_data(session)
+                    dados = load_data(session, st.session_state['cliente'][0][0])
 
                     dados = dados.with_columns(
                         pl.col('DATA_SAIDA').map_elements(lambda x: x.replace(' ', '-'))
@@ -480,6 +491,8 @@ elif 'connection_established' in st.session_state:
                     dados = dados.select(['TIPO_ATENDIMENTO', 'ID_PESSOA', 'COD_CIG', 'SEXO_CLIENTE_VIDAS', 'TP_PRODUTO_VIDAS', 'TP_REDE_VIDAS', 'TP_ACOMODACAO_CIG', 'DESC_CIG',
                                         'CATEGORIAS_CIG', 'TIPO_INTERNACAO_CIG', 'REGIAO_VIDAS', 'CUSTO_POTENCIAL', 'ANO', 'Mês'])
                     dados = dados.rename({'ANO': 'Ano', 'REGIAO_VIDAS': 'Região'})
+                    
+                    dados = dados.with_columns(pl.col('Ano').cast(pl.Int64))
 
                     col1, col2, col3 = st.columns(3)
                     with col1:
@@ -487,6 +500,7 @@ elif 'connection_established' in st.session_state:
                     with col2:
                         st.markdown("<h1 style='text-align: center; color: black;'>Paronama Geral CIG</h1>", unsafe_allow_html=True)
                     
+
                     filtro_ano= st.multiselect(
                         label="Filtro para a coluna Ano",
                         options=dados['Ano'].unique().to_list(),
