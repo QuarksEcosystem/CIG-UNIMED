@@ -125,7 +125,31 @@ def verif_insert_table(df : pd.DataFrame,
         print(session.sql(f"""SELECT COUNT(*) AS LineCount FROM {database}.{schema}.{outputTableName};""").collect())
         
 def consulta_snow(session : Session, cliente):
-    query = f"""SELECT * FROM UNIMED_STREAMLIT_SF.STATA.AMOSTRA_RETORNO WHERE CLIENTE = '{cliente}'"""
+    #consulta a tabela de retorno do stata buscando pela tabela mais recente de output do cliente
+    table_name_query = f"""SELECT table_name
+                    FROM INFORMATION_SCHEMA.TABLES
+                    WHERE table_name like '%{cliente}%'
+                    and table_catalog = 'UNIMED_STREAMLIT_SF'
+                    and table_schema = 'STATA'
+                    ORDER BY table_name desc limit 1;"""
+    table_name = pd.DataFrame(session.sql(table_name_query).collect())
+    print(table_name)
+    query = f"""SELECT * FROM UNIMED_STREAMLIT_SF.STATA.{table_name.iloc[0]['TABLE_NAME']}"""
+    value = pd.DataFrame(session.sql(query).collect())
+
+    return value
+
+def consulta_snow2(session : Session, cliente):
+    #consulta a tabela de retorno do stata buscando pela tabela mais recente de output do cliente
+    table_name_query = f"""SELECT table_name
+                    FROM INFORMATION_SCHEMA.TABLES
+                    WHERE table_name like '%{cliente}%'
+                    and table_catalog = 'UNIMED_STREAMLIT_SF'
+                    and table_schema = 'STATA'
+                    ORDER BY table_name desc limit 1;"""
+    table_name = pd.DataFrame(session.sql(table_name_query).collect())
+    print(table_name)
+    query = f"""SELECT * FROM UNIMED_STREAMLIT_SF.STATA.{table_name.iloc[0]['TABLE_NAME']}"""
     value = pd.DataFrame(session.sql(query).collect())
 
     return value

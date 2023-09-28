@@ -11,7 +11,7 @@ import json
 import yaml
 # from plot_graficos.graficos import tipo_de_rede, tipo_acomodacao, custo_total
 # import streamlit.components.v1 as components
-from connection.snowflakeconnection import connection, connection_report, uploadToSnowflake,verif_insert_table,consulta_snow,updateUserHistory
+from connection.snowflakeconnection import connection, connection_report, uploadToSnowflake,verif_insert_table,consulta_snow,consulta_snow2,updateUserHistory
 from tasks import tasks_snow
 from PIL import Image
 # import base64
@@ -22,7 +22,9 @@ from snowflake.snowpark.session import *
 from streamlit_authenticator.hasher import Hasher
 from streamlit_authenticator.authenticate import Authenticate
 from streamlit_extras.metric_cards import style_metric_cards
+import datetime
 import locale
+import zipfile #adicionado para atender a demanda de upload de arquivos zipados
 
 # from streamlit_extras.colored_header import colored_header #?
 # from streamlit_extras.add_vertical_space import add_vertical_space #?
@@ -346,7 +348,6 @@ def send_email_to_unimed(session : Session):
     return send_email
 
 session_login = create_session_object()
-
 if 'connection_established' not in st.session_state or not st.session_state.connection_established:
     with st.sidebar:
         show = login(session_login)
@@ -392,20 +393,46 @@ elif 'connection_established' in st.session_state:
                     st.success("Carregue arquivo:")
                     # Campo para fazer upload do arquivo
                     uploaded_file = st.file_uploader("Choose a file")
+                    dataframes = []
+                    df = None
                     # Verifica se um arquivo foi carregado
                     if uploaded_file is not None:
+                        print(uploaded_file.type)
                     # if uploaded_file:
+                        if uploaded_file.type == 'application/zip':
+                            print('arquivo zippado')
+                            # Open the ZIP file and extract CSV files
+                            with zipfile.ZipFile(uploaded_file, 'r') as zip_file:
+                                # List all the files in the ZIP archive
+                                zip_file_list = zip_file.namelist()
+                                
+                                # Iterate through each file in the ZIP archive
+                                for file_name in zip_file_list:
+                                    # Check if the file has a .csv extension
+                                    if file_name.endswith('.csv'):
+                                        # Extract the file
+                                        with zip_file.open(file_name) as csv_file:
+                                            # Read the CSV file into a DataFrame
+                                            df = pd.read_csv(csv_file, sep=',', dtype={'COD_PREST': str}, on_bad_lines='skip')#adicionei isso para rodar os testes, o que fazer quando tiver linhas com numeros diferentes de colunas
+                                            # Append the DataFrame to the list
+                                            dataframes.append(df)
+
+                            # Concatenate all the DataFrames into a single DataFrame
+                            df = pd.concat(dataframes, ignore_index=True)
+                            st.dataframe(df.head(10))
+                            
                         # Verifica se o tipo do arquivo é 'text/csv'
-                        if uploaded_file.type == 'text/csv':
+                        elif uploaded_file.type == 'text/csv':
                             # Lê o conteúdo do arquivo em formato de string
                             # stringio = StringIO(uploaded_file.getvalue().decode("utf-8"))
                             # string_data = stringio.read()
                             # Carrega os dados em um DataFrame
 
                             ###Criar validação para checar o separador
-                            df = pd.read_csv(uploaded_file, sep=',', dtype={'COD_PREST': str})
+                            df = pd.read_csv(uploaded_file, sep=',', dtype={'COD_PREST': str}, on_bad_lines='skip')
+                        if df is not None:
                             df = df.loc[:, ~df.columns.str.contains('Unnamed: 0')]
-                            df['CLIENTE'] = st.session_state['cliente'][0][0]
+                            #df['CLIENTE'] = st.session_state['cliente'][0][0]
 
                             # read = pd.read_csv(uploaded_file, chunksize=1000000, encoding='latin1', sep=';', dtype={'COD_PREST': str}, low_memory=False)
                             # Exibe o DataFrame
@@ -420,8 +447,8 @@ elif 'connection_established' in st.session_state:
                             # Botão 'Upload' para carregar os dados para o Snowflake
                             if st.button('Upload'):
                                 #valida_complitude
-                                validacao_complitude = checa_completude(df)
-                                validacao_preliminar = validation_rules_DataFrame(df)
+                                #validacao_complitude = checa_completude(df)
+                                #validacao_preliminar = validation_rules_DataFrame(df)
                                 # if len(validacao_complitude) > 0:
                                 #     error_message = "Arquivo com muitos linhas vazias nas colunas:  \n"
                                 #     for coluna in validacao_complitude:
@@ -444,16 +471,17 @@ elif 'connection_established' in st.session_state:
                                     session = connection(user)
                                     # atualiza_tabela_usuario()
                                     # Carrega os dados para o Snowflake
+                                    target_table = 'INPUT_'+st.session_state['cliente'][0][0]+'_'+datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
                                     uploadToSnowflake(df=df,
                                                         session = session,
-                                                        outputTableName = 'SEGUROS1ANOCOMPLETO_RAW',
+                                                        outputTableName = target_table,
                                                         database = 'UNIMED_STREAMLIT_SF',
                                                         schema = 'BLOB',
                                                         temporary=True)
                                     # Executa tarefas no Snowflake
-                                    tasks_snow(session)
+                                    ##tasks_snow(session)
                                     st.success("Arquivo carregado com sucesso!")
-                                    send_email_to_unimed(session)
+                                    #send_email_to_unimed(session)
 
                 elif pagina_selecionada == 'Consulta':
                     st.success("Aqui está os dados: ")
@@ -465,9 +493,17 @@ elif 'connection_established' in st.session_state:
                     df = consulta_snow(session,cliente)
                     st.dataframe(df.head(10))
                     st.download_button(
-                            label='Download',
+                            label='Download output1',
                             data=df.to_csv().encode('utf-8'),
                             file_name='data_frame.csv',
+                            mime='text/csv'
+                            )
+                    df = consulta_snow2(session,cliente)
+                    st.dataframe(df.head(10)) 
+                    st.download_button(
+                            label='Download output2',
+                            data=df.to_csv().encode('utf-8'),
+                            file_name='data_frame_2.csv',
                             mime='text/csv'
                             )
                 elif pagina_selecionada == 'Gráficos':
