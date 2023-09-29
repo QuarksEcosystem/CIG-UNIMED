@@ -3,34 +3,22 @@ import streamlit_authenticator as stauth
 import pandas as pd
 import polars as pl
 import plotly.express as px
-# import re
-# import validators
 import time
 import datetime
 import json
 import yaml
-# from plot_graficos.graficos import tipo_de_rede, tipo_acomodacao, custo_total
-# import streamlit.components.v1 as components
 from connection.snowflakeconnection import connection, connection_report, uploadToSnowflake,verif_insert_table,consulta_snow,updateUserHistory
 from tasks import tasks_snow
 from PIL import Image
 # import base64
 from validacoes_pd import validation_rules_DataFrame, checa_completude
 from yaml.loader import SafeLoader
-# from itertools import cycle
 from snowflake.snowpark.session import *
 from streamlit_authenticator.hasher import Hasher
 from streamlit_authenticator.authenticate import Authenticate
 from streamlit_extras.metric_cards import style_metric_cards
 import locale
-
-# from streamlit_extras.colored_header import colored_header #?
-# from streamlit_extras.add_vertical_space import add_vertical_space #?
-# from io import StringIO
-
-
-# if 'connection_established' not in st.session_state:
-#     st.session_state['connection_established'] = None
+from plot_graficos.graficos import tipo_de_rede, tipo_acomodacao, evolucao_custo_total, evolucao_qtde_atendimento, evolucao_custo_medio
 
 # Configurando o ambiente do streamlit
 st.set_page_config(page_title="Aplicação CIG",
@@ -46,72 +34,6 @@ def check_timeout():
     timeout = 60
     return -1
 
-# def upper_text(input_text):
-#     input_text = input_text.upper()
-#     return input_text
-# def verificar_user(email_input, cnpj_input):
-#     #keys = json.loads(open("./keys/key.json").read())
-#     # Verificar se a chave email_input existe no dicionário keys.
-#     if validate_email(email_input):
-#         if validate_cnpj(cnpj_input):
-#             return True
-#         else:
-#             st.error("CNPJ Inválida")
-#     else:
-#         st.error("Email Inválido")
-#     return False
-
-# def atualiza_tabela_usuario():
-#     #atualiza a tabela de usuarios no snowflake com os dados do usuario atual
-#     #atualizacao deve ocorrer logo antes da chamada do CIG
-#     st.session_state.email, st.session_state.cnpj, st.session_state.nome, st.session_state.telefone
-#     table = "HISTORICO_USUARIOS"
-#     updateUserHistory(session = session, 
-#                       outputTableName = "HISTORICO_USUARIOS", 
-#                       database = 'UNIMED_STREAMLIT_SF', 
-#                       schema = 'BLOB', 
-#                       email = st.session_state.email, 
-#                       cnpj = st.session_state.cnpj, 
-#                       nome = st.session_state.nome, 
-#                       telefone = st.session_state.telefone
-#                       )
-#     return 0
-
-# def validate_email(email: str) -> bool:
-#         """
-#         Checks the validity of the entered email.
-#         Parameters
-#         ----------
-#         email: str
-#             The email to be validated.
-#         Returns
-
-#         -------
-#         bool
-#             Validity of entered email.
-#         """
-#         return "@" in email and 2 < len(email) < 320
-
-
-
-
-# def validate_cnpj(cnpj: str) -> bool:
-#     LENGTH_CNPJ = 14
-#     if len(cnpj) != LENGTH_CNPJ:
-#         return False
-
-#     if cnpj in (c * LENGTH_CNPJ for c in "1234567890"):
-#         return False
-
-#     cnpj_r = cnpj[::-1]
-#     for i in range(2, 0, -1):
-#         cnpj_enum = zip(cycle(range(2, 10)), cnpj_r[i:])
-#         dv = sum(map(lambda x: int(x[1]) * x[0], cnpj_enum)) * 10 % 11
-#         if cnpj_r[i - 1:i] != str(dv % 10):
-#             return False
-
-#     return True
-
 
 # Acessar os dados do snowflake referente ao user.
 def dados_snow(email_input):
@@ -119,127 +41,7 @@ def dados_snow(email_input):
     key = keys[email_input]
     return key
 
-
-# Função para exibir a seção de login.
-# def show_login_section():
-#     with open('config.yaml') as file:
-#         config = yaml.load(file, Loader=SafeLoader)
-
-    # Creating the authenticator object
-    # authenticator = Authenticate(
-    #     config['credentials'],
-    #     config['cookie']['name'],
-    #     config['cookie']['key'],
-    #     config['cookie']['expiry_days'],
-    #     config['preauthorized']
-    # )
-    # Cria uma seção vazia para exibir o conteúdo
-    # st.markdown('''
-    # ''')
-    # # Cria campos de entrada para o usuário e senha
-    # # name, authentication_status, username = authenticator.login('Login', 'main')
-    # # if authentication_status:
-    # #     st.session_state.name = name
-    # #     st.session_state.connection_established = True
-    # #     authenticator.logout('Logout', 'main')
-    # #     st.write(f'Bem Vindo *{name}*')
-    # # elif authentication_status is False:
-    # #     st.session_state.connection_established = False
-    # #     st.error('Username/password incorreto')
-    # #     st.session_state.clear()
-    # #         # Recarrega a página
-    # # elif authentication_status is None:
-    # #     st.session_state.connection_established = False
-    # #     st.warning('Insira seu Username e Senha')
-
-
-    # name, authentication_status, username = authenticator.login('Login', 'main')
-    # if st.session_state['authentication_status']:
-    #     authenticator.logout('Logout', 'main')
-    #     st.write('Welcome *%s*' % (st.session_state['name']))
-    #     st.session_state.connection_established = True
-    #     st.success("Conexão estabelecida!")
-    #     # Aguarda por 1 segundo antes de recarregar a página
-    #     time.sleep(1)
-    #     st.experimental_rerun()
-    # elif st.session_state['authentication_status'] == False:
-    #     st.error('Username/password is incorrect')
-    # elif st.session_state['authentication_status'] == None:
-    #     st.warning('Please enter your username and password')
-    
-    # # Creating a password reset widget
-    # if authentication_status:
-    #     try:
-    #         if authenticator.reset_password(username, 'Reset password'):
-    #             st.success('Password modified successfully')
-    #     except Exception as e:
-    #         st.error(e)
-
-    # Creating a new user registration widget
-    # try:
-    #     if authenticator.register_user('Register user', preauthorization=False):
-    #         st.success('User registered successfully')
-    # except Exception as e:
-    #     st.error(e)
-
-    # Creating a forgot password widget
-    # try:
-    #     username_forgot_pw, email_forgot_password, random_password = authenticator.forgot_password('Forgot password')
-    #     if username_forgot_pw:
-    #         st.success('New password sent securely')
-    #         # Random password to be transferred to user securely
-    #     else:
-    #         st.error('Username not found')
-    # except Exception as e:
-    #     st.error(e)
-
-    # # Creating a forgot username widget
-    # try:
-    #     username_forgot_username, email_forgot_username = authenticator.forgot_username('Forgot username')
-    #     if username_forgot_username:
-    #         st.success('Username sent securely')
-    #         # Username to be transferred to user securely
-    #     else:
-    #         st.error('Email not found')
-    # except Exception as e:
-    #     st.error(e)
-
-    # # Creating an update user details widget
-    # if authentication_status:
-    #     try:
-    #         if authenticator.update_user_details(username, 'Update user details'):
-    #             st.success('Entries updated successfully')
-    #     except Exception as e:
-    #         st.error(e)
-
-    # with open('./config.yaml', 'w') as file:
-    #     yaml.dump(config, file, default_flow_style=False)
-        
-    # email_input = st.text_input("Email:", key="email_input")
-    # cnpj_input = st.text_input("CNPJ (apenas os números):", key="cnpj_input")
-    # nome_input = st.text_input("Nome:", key="nome_input")
-    # telefone_input = st.text_input("Telefone:", key="telefone_input")
-
-    # # Verifica se o botão "Connect" foi pressionado
-    # if st.button("Connect"):
-    #     # Verifica se os campos de usuário e senha foram preenchidos
-    #     if email_input and cnpj_input and nome_input and telefone_input:
-    #         # Verifica se o usuário e senha são válidos (chamando a função verificar_user)
-    #         if verificar_user(email_input,cnpj_input):
-    #             st.session_state.email = email_input
-    #             st.session_state.cnpj = cnpj_input
-    #             st.session_state.nome = nome_input
-    #             st.session_state.telefone = telefone_input
-    #             st.session_state.connection_established = True
-    #             st.success("Conexão estabelecida!")
-    #             # Aguarda por 1 segundo antes de recarregar a página
-    #             time.sleep(1)
-    #             st.experimental_rerun()
-    #         # Se o usuário ou senha forem incorretos, exibe uma mensagem de aviso
-    #     else:
-    #         # Se os campos de usuário e senha não forem preenchidos, exibe uma mensagem de aviso
-    #         st.warning("Por favor, preencha todos os campos.")
-    
+  
 @st.cache_resource
 def create_session_object():
     connection_parameters = {
@@ -257,11 +59,10 @@ def create_session_object():
 
 
 @st.cache_data
-def load_data(_session, cliente):
+def load_data(_session, tabela):
     _session = connection_report(user)
     # cliente = st.session_state['name']
-    snow_df = _session.table('AMOSTRA_RETORNO')
-    snow_df = snow_df.filter(col("CLIENTE") == cliente)
+    snow_df = _session.table(tabela)
     pl_df = pl.from_pandas(snow_df.to_pandas())
     return pl_df
 
@@ -296,54 +97,12 @@ def login(session_login):
         st.session_state['button_pressed'] = False
 
 
-def tipo_de_rede(dataframe):
-    dataframe = dataframe.groupby('TP_REDE_VIDAS').agg(pl.col('CUSTO_POTENCIAL').sum())
-    dataframe = dataframe.rename({'TP_REDE_VIDAS': 'Tipo', 'CUSTO_POTENCIAL': 'Custo Total'})
-    fig = px.bar(dataframe, y='Tipo', x='Custo Total', orientation='h', text_auto=True, title='Tipo de Rede', color_discrete_sequence=[px.colors.qualitative.T10[4]])
-    return fig
-
-
-def tipo_acomodacao(dataframe):
-    dataframe = dataframe.groupby('TP_ACOMODACAO_CIG').agg(pl.col('ID_PESSOA').count())
-    dataframe = dataframe.rename({'ID_PESSOA':'Quantidade', 'TP_ACOMODACAO_CIG': 'Acomodação CIG'})
-    fig = px.pie(dataframe, values='Quantidade', names='Acomodação CIG', title='Tipo Acomodação', color_discrete_sequence=[px.colors.qualitative.Dark2[1], 
-                                                                                                                           px.colors.qualitative.Set2[1],
-                                                                                                                           px.colors.qualitative.Pastel2[1]])
-    fig.update_traces(hole=.6)
-    return fig
-
-
-def evolucao_custo_total(dataframe):
-    dataframe = dataframe.groupby('Ano').agg(pl.col('CUSTO_POTENCIAL').sum())
-    dataframe = dataframe.rename({'CUSTO_POTENCIAL':'Custo Total'})
-    dataframe = dataframe.sort(pl.col('Ano'))
-    fig = px.bar(dataframe, x='Ano', y='Custo Total', text_auto=True, title='Evolução do Custo Total', color_discrete_sequence=[px.colors.qualitative.T10[4]])
-    fig.update_xaxes(type='category')
-    return fig
-
-
-def evolucao_qtde_atendimento(dataframe):
-    dataframe = dataframe.groupby('Ano').agg(pl.col('ID_PESSOA').count().alias('Quantidade'))
-    dataframe = dataframe.sort(pl.col('Ano'))
-    fig = px.bar(dataframe, x='Quantidade', y='Ano',orientation='h',text_auto=True, title='Evolução da Qtde de Atendimento', color_discrete_sequence=[px.colors.qualitative.Dark2[1]])
-    fig.update_yaxes(type='category')
-    return fig
-
-
-def evolucao_custo_medio(dataframe):
-    dataframe = dataframe.groupby('Ano').agg(pl.col('CUSTO_POTENCIAL').mean())
-    dataframe = dataframe.rename({'CUSTO_POTENCIAL': 'Custo Médio'})
-    dataframe = dataframe.sort(pl.col('Ano'))
-    fig = px.bar(dataframe, x='Ano', y='Custo Médio',text_auto=True, title='Evolução do Custo Médio', color_discrete_sequence=[px.colors.qualitative.T10[4]])
-    fig.update_xaxes(type='category')
-    return fig
-
-
 def send_email_to_unimed(session : Session):
     user_email = st.session_state['email'][0][0]
     user_cliente = st.session_state['cliente'][0][0]
     send_email = session.call("SEND_EMAIL_NOTIFICATION",user_email,user_cliente,datetime.datetime.now())    
-    return send_email
+    return send_email       
+
 
 session_login = create_session_object()
 
@@ -352,13 +111,6 @@ if 'connection_established' not in st.session_state or not st.session_state.conn
         show = login(session_login)
 elif 'connection_established' in st.session_state:
     with st.sidebar:
-        # # Título da aplicação na Main Page
-        # st.title('Snowflake-Streamlit App')
-        # # Verifica se a conexão ainda não foi estabelecida ou se não está estabelecida
-        # if 'connection_established' not in st.session_state or not st.session_state.connection_established:
-        #     show_login_section()
-        #     st.write("Para estabelecer conexão, realize o login:")
-        # else:
         st.markdown("<br><br>", unsafe_allow_html=True)
         # Divide a coluna da barra lateral em duas partes
         col1, col2 = st.columns(2)
@@ -366,15 +118,11 @@ elif 'connection_established' in st.session_state:
             image = Image.open('./img/icon-g3e57076af_1280.png')
             st.image(image, width=100,output_format='PNG', use_column_width=False)
         with col2:
-            # Exibe o cabeçalho com o email do usuário
-            # st.header(st.session_state['nome'])
             user_name = st.session_state['login_name'][0][0]
             st.write(f"Bem vindo(a): {user_name.upper()}")
             opcoes_menu = ['Entrada de dados', 'Consulta', 'Gráficos']
             # Campo de menu
             pagina_selecionada = st.selectbox('Menu', opcoes_menu)
-        # Botão 'Sair' na barra lateral
-        # if st.session_state['authentication_status'] == False:
         if st.button('Sair'):
             st.experimental_set_query_params()
             time.sleep(1)
@@ -397,22 +145,13 @@ elif 'connection_established' in st.session_state:
                     # if uploaded_file:
                         # Verifica se o tipo do arquivo é 'text/csv'
                         if uploaded_file.type == 'text/csv':
-                            # Lê o conteúdo do arquivo em formato de string
-                            # stringio = StringIO(uploaded_file.getvalue().decode("utf-8"))
-                            # string_data = stringio.read()
-                            # Carrega os dados em um DataFrame
+
 
                             ###Criar validação para checar o separador
                             df = pd.read_csv(uploaded_file, sep=',', dtype={'COD_PREST': str})
                             df = df.loc[:, ~df.columns.str.contains('Unnamed: 0')]
                             df['CLIENTE'] = st.session_state['cliente'][0][0]
 
-                            # read = pd.read_csv(uploaded_file, chunksize=1000000, encoding='latin1', sep=';', dtype={'COD_PREST': str}, low_memory=False)
-                            # Exibe o DataFrame
-                            # for chunk in read:
-                                    # Processa cada chunk conforme necessário
-                                # (exemplo: realizar operações, transformações, etc.)
-                                # Exemplo simples: imprimir o chunk
                             st.dataframe(df.head(10))
                                 # break
                             # Define o modo de inserção como 'Append'
@@ -422,15 +161,6 @@ elif 'connection_established' in st.session_state:
                                 #valida_complitude
                                 validacao_complitude = checa_completude(df)
                                 validacao_preliminar = validation_rules_DataFrame(df)
-                                # if len(validacao_complitude) > 0:
-                                #     error_message = "Arquivo com muitos linhas vazias nas colunas:  \n"
-                                #     for coluna in validacao_complitude:
-                                #         error_message += coluna[0] + ': ' + str(coluna[1]*100) + '\%'+' de linhas preenchidas. Minimo aceitavel : ' + str(coluna[2]*100) + '\%' + '  \n'
-                                #     st.error(error_message)
-                                #valida_complitude
-                                #el
-                                # if validation_rules_DataFrame(df) is not None:
-                                #     st.error(validacao_preliminar)
                                 if 1 < 0 :
                                     print('Apagar isso e tirar o comentario das validações')
                                 # Obtém as informações do usuário para conexão ao Snowflake
@@ -471,10 +201,21 @@ elif 'connection_established' in st.session_state:
                             mime='text/csv'
                             )
                 elif pagina_selecionada == 'Gráficos':
+                    tabelas = session_login.sql('SHOW TABLES;').collect()
+                    tabelas = tabelas[:]
+                    
+                    df_tabelas = session_login.create_dataframe(tabelas)
+                    df_tabelas = df_tabelas[['NAME']]
+                    df_tabelas = df_tabelas.to_pandas()
+                    df_tabelas = df_tabelas[df_tabelas['NAME'].str.contains(st.session_state['cliente'][0][0])]
+                    
+                    options = df_tabelas['NAME'].unique()
+                    option = st.selectbox("Escolha a tabela", options=options)
+                    
                     user = dados_snow('report')
                     session = connection_report(user)
 
-                    dados = load_data(session, st.session_state['cliente'][0][0])
+                    dados = load_data(session, option)
 
                     dados = dados.with_columns(
                         pl.col('DATA_SAIDA').map_elements(lambda x: x.replace(' ', '-'))
@@ -489,10 +230,14 @@ elif 'connection_established' in st.session_state:
                             .alias("Mês")
                     )
                     dados = dados.select(['TIPO_ATENDIMENTO', 'ID_PESSOA', 'COD_CIG', 'SEXO_CLIENTE_VIDAS', 'TP_PRODUTO_VIDAS', 'TP_REDE_VIDAS', 'TP_ACOMODACAO_CIG', 'DESC_CIG',
-                                        'CATEGORIAS_CIG', 'TIPO_INTERNACAO_CIG', 'REGIAO_VIDAS', 'CUSTO_POTENCIAL', 'ANO', 'Mês'])
+                                          'CATEGORIAS_CIG', 'TIPO_INTERNACAO_CIG', 'REGIAO_VIDAS', 'VLR_PROD_MEDICA', 'DEFINIDORES_CTI_VIDAS', 'OBITO_VIDAS', 'ANO', 'Mês'])
                     dados = dados.rename({'ANO': 'Ano', 'REGIAO_VIDAS': 'Região'})
                     
-                    dados = dados.with_columns(pl.col('Ano').cast(pl.Int64))
+                    dados = dados.with_columns(pl.col('Ano').cast(pl.Int64), 
+                                               pl.col('VLR_PROD_MEDICA').cast(pl.Float64),
+                                               pl.col('DEFINIDORES_CTI_VIDAS').cast(pl.Int64),
+                                               pl.col('OBITO_VIDAS').cast(pl.Int64)
+                                )
 
                     col1, col2, col3 = st.columns(3)
                     with col1:
@@ -519,12 +264,12 @@ elif 'connection_established' in st.session_state:
                                        )
 
                     #Baloes - cards             
-                    col_a1, col_a2= st.columns(2)
+                    col_a1, col_a2, col_a3= st.columns(3)
 
-                    custo_total = dados_filtrado.select(pl.sum('CUSTO_POTENCIAL'))['CUSTO_POTENCIAL'][0]
+                    custo_total = dados_filtrado.select(pl.sum('VLR_PROD_MEDICA'))['VLR_PROD_MEDICA'][0]
                     custo_total = locale.format_string("%.2f", custo_total, grouping=True)
 
-                    custo_medio = dados_filtrado.select(pl.mean('CUSTO_POTENCIAL'))['CUSTO_POTENCIAL'][0]
+                    custo_medio = dados_filtrado.select(pl.mean('VLR_PROD_MEDICA'))['VLR_PROD_MEDICA'][0]
                     custo_medio = locale.format_string("%.2f", custo_medio, grouping=True)
 
                     qtde_atendimento = len(dados_filtrado)
@@ -532,12 +277,24 @@ elif 'connection_established' in st.session_state:
 
                     contagem_cod_cig = dados_filtrado['COD_CIG'].n_unique()
                     contagem_cod_cig = locale.format_string("%d", contagem_cod_cig, grouping=True)
-                    
+
+                    contagem_id_pessoa = dados_filtrado['ID_PESSOA'].n_unique()
+                    contagem_id_pessoa = locale.format_string("%d", contagem_id_pessoa, grouping=True)
+
+                    qtde_cti = dados_filtrado.select(pl.sum('DEFINIDORES_CTI_VIDAS'))['DEFINIDORES_CTI_VIDAS'][0]
+                    pct_cti = round((qtde_cti / int(qtde_atendimento.replace('.', ''))) * 100, 2)
+
+                    qtde_obitos = dados_filtrado.select(pl.sum('OBITO_VIDAS'))['OBITO_VIDAS'][0]
+                    pct_obitos = round((qtde_obitos / int(qtde_atendimento.replace('.', ''))) * 100, 2)
+
                     col_a1.metric('Custo Total', value=f'R${custo_total}')
                     col_a1.metric('Custo Médio', value=f'R${custo_medio}')
 
                     col_a2.metric('Qtde Atendimento', value=qtde_atendimento)
                     col_a2.metric('Contagem cod_CIG', value=contagem_cod_cig)
+
+                    col_a3.metric('% CTI', value=f'{pct_cti}%')
+                    col_a3.metric('Mortalidade', value=f'{pct_obitos}%')
 
                     style_metric_cards(
                         background_color="#FFF",
@@ -565,25 +322,12 @@ elif 'connection_established' in st.session_state:
                         st.plotly_chart(tipo_de_rede(dados_filtrado), use_container_width=True)
 
 
-                    cigs = dados_filtrado.groupby('DESC_CIG').agg(
-                       pl.sum('CUSTO_POTENCIAL').alias('Custo Total'),
-                       pl.mean('CUSTO_POTENCIAL').alias('Custo Médio'),
+                    cigs = dados_filtrado.group_by('DESC_CIG').agg(
+                       pl.sum('VLR_PROD_MEDICA').alias('Custo Total'),
+                       pl.mean('VLR_PROD_MEDICA').alias('Custo Médio'),
                        pl.count().alias('Qtde Atendimento')
                    )
                     st.dataframe(cigs, use_container_width=True)
                     
                     # fig = px.colors.qualitative.swatches()
                     # st.plotly_chart(fig)
-
-                    
-                    # st.success("Aqui está os dados: ")
-                    # user = dados_snow('report')
-                    # session = connection_report(user)
-                    # df = consulta_snow(session)
-                    # st.dataframe(df, height=900)
-                    # st.download_button(
-                    #         label='Download',
-                    #         data=df.to_csv().encode('utf-8'),
-                    #         file_name='data_frame.csv',
-                    #         mime='text/csv'
-                    #         )
