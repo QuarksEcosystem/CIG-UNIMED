@@ -267,10 +267,16 @@ elif 'connection_established' in st.session_state:
                     col_a1, col_a2, col_a3= st.columns(3)
 
                     custo_total = dados_filtrado.select(pl.sum('VLR_PROD_MEDICA'))['VLR_PROD_MEDICA'][0]
-                    custo_total = locale.format_string("%.2f", custo_total, grouping=True)
+                    if custo_total is None:
+                        custo_total = 0
+                    else:    
+                        custo_total = locale.format_string("%.2f", custo_total, grouping=True)
 
                     custo_medio = dados_filtrado.select(pl.mean('VLR_PROD_MEDICA'))['VLR_PROD_MEDICA'][0]
-                    custo_medio = locale.format_string("%.2f", custo_medio, grouping=True)
+                    if custo_medio is None:
+                        custo_medio = 0
+                    else:
+                        custo_medio = locale.format_string("%.2f", custo_medio, grouping=True)
 
                     qtde_atendimento = len(dados_filtrado)
                     qtde_atendimento = locale.format_string("%d", qtde_atendimento, grouping=True)
@@ -282,10 +288,16 @@ elif 'connection_established' in st.session_state:
                     contagem_id_pessoa = locale.format_string("%d", contagem_id_pessoa, grouping=True)
 
                     qtde_cti = dados_filtrado.select(pl.sum('DEFINIDORES_CTI_VIDAS'))['DEFINIDORES_CTI_VIDAS'][0]
-                    pct_cti = round((qtde_cti / int(qtde_atendimento.replace('.', ''))) * 100, 2)
+                    if qtde_cti != 0:
+                        pct_cti = round((qtde_cti / int(qtde_atendimento.replace('.', ''))) * 100, 2)
+                    else:
+                        pct_cti = 0
 
                     qtde_obitos = dados_filtrado.select(pl.sum('OBITO_VIDAS'))['OBITO_VIDAS'][0]
-                    pct_obitos = round((qtde_obitos / int(qtde_atendimento.replace('.', ''))) * 100, 2)
+                    if qtde_obitos != 0:
+                        pct_obitos = round((qtde_obitos / int(qtde_atendimento.replace('.', ''))) * 100, 2)
+                    else: 
+                        pct_obitos = 0
 
                     col_a1.metric('Custo Total', value=f'R${custo_total}')
                     col_a1.metric('Custo Médio', value=f'R${custo_medio}')
