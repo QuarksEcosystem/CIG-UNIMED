@@ -1,43 +1,46 @@
 import streamlit as st
-import streamlit_authenticator as stauth
-import pandas as pd
 import polars as pl
 import plotly.express as px
-# import re
-# import validators
-import time
-import json
-import yaml
-# import streamlit.components.v1 as components
-from connection.snowflakeconnection import connection, connection_report, uploadToSnowflake,verif_insert_table,consulta_snow,updateUserHistory, send_email_to_unimed
-from tasks import tasks_snow
-from PIL import Image
-# import base64
-from validacoes_pd import validation_rules_DataFrame, checa_completude
-from yaml.loader import SafeLoader
-# from itertools import cycle
-from snowflake.snowpark.session import *
-from streamlit_authenticator.hasher import Hasher
-from streamlit_authenticator.authenticate import Authenticate
-from Main_Page import load_data, dados_snow
 
 
 def tipo_de_rede(dataframe):
-    df = dataframe.group_by('TP_REDE_VIDAS', as_index=False)[['CUSTO_POTENCIAL']].sum()
-    fig = px.bar(df, x='TP_REDE_VIDAS', y='CUSTO_POTENCIAL', orientation='h', text_auto=True)
+    dataframe = dataframe.group_by('TP_REDE_VIDAS').agg(pl.col('VLR_PROD_MEDICA').sum())
+    dataframe = dataframe.rename({'TP_REDE_VIDAS': 'Tipo', 'VLR_PROD_MEDICA': 'Custo Total'})
+    fig = px.bar(dataframe, y='Tipo', x='Custo Total', orientation='h', text_auto=True, title='Tipo de Rede', color_discrete_sequence=[px.colors.qualitative.T10[4]])
     return fig
 
 
 def tipo_acomodacao(dataframe):
-    df = dataframe.group_by('TP_ACOMODACAO_CIG', as_index=False)[['ID_PESSOA']].count()
-    df = dataframe.rename({'ID_PESSOA':'Quantidade'})
-    fig = px.pie(df)
+    dataframe = dataframe.group_by('TP_ACOMODACAO_CIG').agg(pl.col('ID_PESSOA').count())
+    dataframe = dataframe.rename({'ID_PESSOA':'Quantidade', 'TP_ACOMODACAO_CIG': 'Acomodação CIG'})
+    fig = px.pie(dataframe, values='Quantidade', names='Acomodação CIG', title='Tipo Acomodação', color_discrete_sequence=[px.colors.qualitative.Dark2[1], 
+                                                                                                                           px.colors.qualitative.Set2[1],
+                                                                                                                           px.colors.qualitative.Pastel2[1]])
+    fig.update_traces(hole=.6)
     return fig
 
-# def custo_total():
-#     user = dados_snow('report')
-#     _session = connection_report(user)
-#     df_full = load_data(_session)
-#     df = df_full['CUSTO_POTENCIAL'].agg(pl.sum()).to_pandas()['sum']
-#     fig = px.bar(x=['CUSTO_POTENCIAL'],y=df,text_auto=True)
-#     return fig
+
+def evolucao_custo_total(dataframe):
+    dataframe = dataframe.group_by('Ano').agg(pl.col('VLR_PROD_MEDICA').sum())
+    dataframe = dataframe.rename({'VLR_PROD_MEDICA':'Custo Total'})
+    dataframe = dataframe.sort(pl.col('Ano'))
+    fig = px.bar(dataframe, x='Ano', y='Custo Total', text_auto=True, title='Evolução do Custo Total', color_discrete_sequence=[px.colors.qualitative.T10[4]])
+    fig.update_xaxes(type='category')
+    return fig
+
+
+def evolucao_qtde_atendimento(dataframe):
+    dataframe = dataframe.group_by('Ano').agg(pl.col('ID_PESSOA').count().alias('Quantidade'))
+    dataframe = dataframe.sort(pl.col('Ano'))
+    fig = px.bar(dataframe, x='Quantidade', y='Ano',orientation='h',text_auto=True, title='Evolução da Qtde de Atendimento', color_discrete_sequence=[px.colors.qualitative.Dark2[1]])
+    fig.update_yaxes(type='category')
+    return fig
+
+
+def evolucao_custo_medio(dataframe):
+    dataframe = dataframe.group_by('Ano').agg(pl.col('VLR_PROD_MEDICA').mean())
+    dataframe = dataframe.rename({'VLR_PROD_MEDICA': 'Custo Médio'})
+    dataframe = dataframe.sort(pl.col('Ano'))
+    fig = px.bar(dataframe, x='Ano', y='Custo Médio',text_auto=True, title='Evolução do Custo Médio', color_discrete_sequence=[px.colors.qualitative.T10[4]])
+    fig.update_xaxes(type='category')
+    return fig
