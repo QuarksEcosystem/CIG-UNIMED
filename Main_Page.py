@@ -122,11 +122,13 @@ elif 'connection_established' in st.session_state:
             image = Image.open('./img/icon-g3e57076af_1280.png')
             st.image(image, width=100,output_format='PNG', use_column_width=False)
         with col2:
+            # Exibe o cabeçalho com o email do usuário
             user_name = st.session_state['login_name'][0][0]
             st.write(f"Bem vindo(a): {user_name.upper()}")
             opcoes_menu = ['Entrada de dados', 'Consulta', 'Gráficos']
             # Campo de menu
             pagina_selecionada = st.selectbox('Menu', opcoes_menu)
+        # Botão 'Sair' na barra lateral
         if st.button('Sair'):
             st.experimental_set_query_params()
             time.sleep(1)
@@ -174,13 +176,16 @@ elif 'connection_established' in st.session_state:
                             
                         # Verifica se o tipo do arquivo é 'text/csv'
                         elif uploaded_file.type == 'text/csv':
+                            # Lê o conteúdo do arquivo em formato de string
+                            # Carrega os dados em um DataFrame
 
                             ###Criar validação para checar o separador
                             df = pd.read_csv(uploaded_file, sep=',', dtype={'COD_PREST': str}, on_bad_lines='skip')
                         if df is not None:
                             df = df.loc[:, ~df.columns.str.contains('Unnamed: 0')]
-                            #df['CLIENTE'] = st.session_state['cliente'][0][0]
-
+                            
+                            # Exibe o DataFrame
+                            
                             st.dataframe(df.head(10))
                                 # break
                             # Define o modo de inserção como 'Append'
@@ -188,19 +193,18 @@ elif 'connection_established' in st.session_state:
                             # Botão 'Upload' para carregar os dados para o Snowflake
                             if st.button('Upload'):
                                 #valida_complitude
-                                #validacao_complitude = checa_completude(df)
-                                #validacao_preliminar = validation_rules_DataFrame(df)
-                                # if len(validacao_complitude) > 0:
-                                #     error_message = "Arquivo com muitos linhas vazias nas colunas:  \n"
-                                #     for coluna in validacao_complitude:
-                                #         error_message += coluna[0] + ': ' + str(coluna[1]*100) + '\%'+' de linhas preenchidas. Minimo aceitavel : ' + str(coluna[2]*100) + '\%' + '  \n'
-                                #     st.error(error_message)
+                                validacao_complitude = checa_completude(df)
+                                validacao_preliminar = validation_rules_DataFrame(df)
+                                if len(validacao_complitude) > 0:
+                                    error_message = "Arquivo com muitos linhas vazias nas colunas:  \n"
+                                    for coluna in validacao_complitude:
+                                        error_message += coluna[0] + ': ' + str(coluna[1]*100) + '\%'+' de linhas preenchidas. Minimo aceitavel : ' + str(coluna[2]*100) + '\%' + '  \n'
+                                    st.error(error_message)
                                 #valida_complitude
-                                #el
-                                # if validation_rules_DataFrame(df) is not None:
-                                #     st.error(validacao_preliminar)
-                                if 1 < 0 :
-                                    print('Apagar isso e tirar o comentario das validações')
+                                elif validation_rules_DataFrame(df) is not None:
+                                     st.error(validacao_preliminar)
+                                # if 1 < 0 :
+                                #     print('Apagar isso e tirar o comentario das validações')
                                 # Obtém as informações do usuário para conexão ao Snowflake
                                 #checa se a ultima vez que essa cnpj rodou
                                 timeout_left = check_timeout() 
@@ -219,10 +223,8 @@ elif 'connection_established' in st.session_state:
                                                         database = 'UNIMED_STREAMLIT_SF',
                                                         schema = 'BLOB',
                                                         temporary=True)
-                                    # Executa tarefas no Snowflake
-                                    ##tasks_snow(session)
                                     st.success("Arquivo carregado com sucesso!")
-                                    #send_email_to_unimed(session)
+                                    send_email_to_unimed(session)
 
                 elif pagina_selecionada == 'Consulta':
                     st.success("Aqui está os dados: ")
@@ -387,6 +389,3 @@ elif 'connection_established' in st.session_state:
                        pl.count().alias('Qtde Atendimento')
                    )
                     st.dataframe(cigs, use_container_width=True)
-                    
-                    # fig = px.colors.qualitative.swatches()
-                    # st.plotly_chart(fig)
