@@ -7,16 +7,16 @@ from snowflake.connector.pandas_tools import write_pandas
 
 def connection(sessionDataFilePath:json):
     session = Session.builder.configs(sessionDataFilePath).create()
-    session.sql(f"""USE WAREHOUSE WH_POC;""").collect()
-    session.sql(f"""USE DATABASE UNIMED_STREAMLIT_SF""").collect()
-    session.sql(f"""USE SCHEMA BLOB;""").collect()
+    session.sql(f"""USE WAREHOUSE streamlit_wh;""").collect()
+    session.sql(f"""USE DATABASE CIG_DB""").collect()
+    session.sql(f"""USE SCHEMA raw_input_clientes;""").collect()
     return session
 
 def connection_report(sessionDataFilePath:json):
     session = Session.builder.configs(sessionDataFilePath).create()
-    session.sql(f"""USE WAREHOUSE WH_POC;""").collect()
-    session.sql(f"""USE DATABASE UNIMED_STREAMLIT_SF""").collect()
-    session.sql(f"""USE SCHEMA STATA;""").collect()
+    session.sql(f"""USE WAREHOUSE streamlit_wh;""").collect()
+    session.sql(f"""USE DATABASE CIG_DB""").collect()
+    session.sql(f"""USE SCHEMA output_cig;""").collect()
     return session
 
 def castInvalidFormats(df: pd.DataFrame):
@@ -125,31 +125,31 @@ def verif_insert_table(df : pd.DataFrame,
         print(session.sql(f"""SELECT COUNT(*) AS LineCount FROM {database}.{schema}.{outputTableName};""").collect())
         
 def consulta_snow(session : Session, cliente):
-    #consulta a tabela de retorno do stata buscando pela tabela mais recente de output do cliente
+    #consulta a tabela de retorno do output_cig buscando pela tabela mais recente de output do cliente
     table_name_query = f"""SELECT table_name
                     FROM INFORMATION_SCHEMA.TABLES
                     WHERE table_name like '%{cliente}%'
-                    and table_catalog = 'UNIMED_STREAMLIT_SF'
-                    and table_schema = 'STATA'
+                    and table_catalog = 'CIG_DB'
+                    and table_schema = 'output_cig'
                     ORDER BY table_name desc limit 1;"""
     table_name = pd.DataFrame(session.sql(table_name_query).collect())
     print(table_name)
-    query = f"""SELECT * FROM UNIMED_STREAMLIT_SF.STATA.{table_name.iloc[0]['TABLE_NAME']}"""
+    query = f"""SELECT * FROM CIG_DB.output_cig.{table_name.iloc[0]['TABLE_NAME']}"""
     value = pd.DataFrame(session.sql(query).collect())
 
     return value
 
 def consulta_snow2(session : Session, cliente):
-    #consulta a tabela de retorno do stata buscando pela tabela mais recente de output do cliente
+    #consulta a tabela de retorno do output_cig buscando pela tabela mais recente de output do cliente
     table_name_query = f"""SELECT table_name
                     FROM INFORMATION_SCHEMA.TABLES
                     WHERE table_name like '%{cliente}%'
-                    and table_catalog = 'UNIMED_STREAMLIT_SF'
-                    and table_schema = 'STATA'
+                    and table_catalog = 'CIG_DB'
+                    and table_schema = 'output_cig'
                     ORDER BY table_name desc limit 1;"""
     table_name = pd.DataFrame(session.sql(table_name_query).collect())
     print(table_name)
-    query = f"""SELECT * FROM UNIMED_STREAMLIT_SF.STATA.{table_name.iloc[0]['TABLE_NAME']}"""
+    query = f"""SELECT * FROM CIG_DB.output_cig.{table_name.iloc[0]['TABLE_NAME']}"""
     value = pd.DataFrame(session.sql(query).collect())
 
     return value

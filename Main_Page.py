@@ -51,12 +51,12 @@ def dados_snow(email_input):
 def create_session_object():
     connection_parameters = {
       "account": "zd27083.us-east-2.aws",
-      "user": "GUSTAVOCIRILO",
-      "password": "41593055Gu@",
-      "role": "RL_POC",
-      "warehouse": "WH_POC",
-      "database": "UNIMED_STREAMLIT_SF",
-      "schema": "STATA",
+      "user": "streamlit_user",
+      "password": "223LP8H9Bo!m",
+      "role": "streamlit_role",
+      "warehouse": "streamlit_wh",
+      "database": "CIG_DB",
+      "schema": "output_cig",
       "client_session_keep_alive": True
    }
     session = Session.builder.configs(connection_parameters).create()
@@ -80,11 +80,11 @@ def login(session_login):
         password = st.text_input("Password", type="password")
         submit_button = st.form_submit_button(label='Login')
     if submit_button:
-        st.session_state['login_username'] = session_login.sql(f"SELECT USERNAME FROM UNIMED_STREAMLIT_SF.STATA.ENCRYPTED_USERS WHERE USERNAME = '{username.upper()}';").collect()
-        st.session_state['login_password'] = session_login.sql(f"SELECT TO_VARCHAR(DECRYPT(PASSWORD, '{passphrase}'), 'utf-8') FROM UNIMED_STREAMLIT_SF.STATA.ENCRYPTED_USERS WHERE USERNAME = '{username.upper()}';").collect()
-        st.session_state['login_name'] = session_login.sql(f"SELECT NAME FROM UNIMED_STREAMLIT_SF.STATA.ENCRYPTED_USERS WHERE USERNAME = '{username.upper()}';").collect()
-        st.session_state['email'] = session_login.sql(f"SELECT EMAIL FROM UNIMED_STREAMLIT_SF.STATA.ENCRYPTED_USERS WHERE USERNAME = '{username.upper()}';").collect()
-        st.session_state['cliente'] = session_login.sql(f"SELECT CLIENTE FROM UNIMED_STREAMLIT_SF.STATA.ENCRYPTED_USERS WHERE USERNAME = '{username.upper()}';").collect()
+        st.session_state['login_username'] = session_login.sql(f"SELECT USERNAME FROM CIG_DB.output_cig.ENCRYPTED_USERS WHERE USERNAME = '{username.upper()}';").collect()
+        st.session_state['login_password'] = session_login.sql(f"SELECT TO_VARCHAR(DECRYPT(PASSWORD, '{passphrase}'), 'utf-8') FROM CIG_DB.output_cig.ENCRYPTED_USERS WHERE USERNAME = '{username.upper()}';").collect()
+        st.session_state['login_name'] = session_login.sql(f"SELECT NAME FROM CIG_DB.output_cig.ENCRYPTED_USERS WHERE USERNAME = '{username.upper()}';").collect()
+        st.session_state['email'] = session_login.sql(f"SELECT EMAIL FROM CIG_DB.output_cig.ENCRYPTED_USERS WHERE USERNAME = '{username.upper()}';").collect()
+        st.session_state['cliente'] = session_login.sql(f"SELECT CLIENTE FROM CIG_DB.output_cig.ENCRYPTED_USERS WHERE USERNAME = '{username.upper()}';").collect()
         if len(st.session_state['login_username']) == 0:
             st.warning('Usuário não existe') 
             time.sleep(3)
@@ -220,8 +220,8 @@ elif 'connection_established' in st.session_state:
                                     uploadToSnowflake(df=df,
                                                         session = session,
                                                         outputTableName = target_table,
-                                                        database = 'UNIMED_STREAMLIT_SF',
-                                                        schema = 'BLOB',
+                                                        database = 'CIG_DB',
+                                                        schema = 'raw_input_clientes',
                                                         temporary=True)
                                     st.success("Arquivo carregado com sucesso!")
                                     send_email_to_unimed(session)

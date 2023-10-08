@@ -1,9 +1,9 @@
 {
     "account": "zd27083.us-east-2.aws",
-    "user": "GUSTAVOCIRILO",
-    "password": "41593055Gu@",
-    "role":"RL_POC",
-    "warehouse":"WH_POC",
-    "database":"UNIMED_STREAMLIT_SF",
-    "schema":"STATA"
+    "user": "streamlit_user",
+    "password": "223LP8H9Bo!m",
+    "role":"streamlit_role",
+    "warehouse":"streamlit_wh",
+    "database":"CIG_DB",
+    "schema":"output_cig"
 }
