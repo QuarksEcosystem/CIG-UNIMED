@@ -31,13 +31,13 @@ import os
 ## Parameters
 print("Setting parameters")
 ## TO-DO : In the future, replace these with command line arguments. 
-database="CIG_DB"
-schema="raw_input_clientes"
-warehouse="streamlit_wh"
+database="DB_STREAMLIT"
+schema="RAW_INPUT"
+warehouse="WH_STREAMLIT"
 #table="BASE_SEGUROS"
 ## Quando o nome da base for 'case sensitive', coloque o nome entre ""(aspas duplas).
 table='"SEGUROS1ANOCOMPLETO_RAW"'
-role="streamlit_role"
+role="SF_RL_STREAMLIT"
 # outputTable="tabCiGSnowflake"
 tabSizes = []
 
@@ -271,11 +271,11 @@ def tasks_snow(session:Session):
 #uploadToSnowflake(df=df,
 #               session = session,
 #                outputTableName = 'SEGUROS1ANOCOMPLETO_RAW',
-#               database = 'CIG_DB',
-#               schema = 'raw_input_clientes',
+#               database = 'DB_STREAMLIT',
+#               schema = 'RAW_INPUT',
 #               temporary=True)
 #print(df.head(10))
 #tasks_snow(session=session)
-#query = f"""SELECT * FROM CIG_DB.raw_input_clientes.tabCiGSnowflake"""
+#query = f"""SELECT * FROM DB_STREAMLIT.RAW_INPUT.tabCiGSnowflake"""
 #value = pd.DataFrame(session.sql(query).collect())
 #print(value.head(10))

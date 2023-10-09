@@ -1,9 +1,9 @@
 {
-    "account": "zd27083.us-east-2.aws",
-    "user": "streamlit_user",
+    "account": "jk14208.east-us-2.azure",
+    "user": "USER_STREAMLIT",
     "password": "223LP8H9Bo!m",
-    "role":"streamlit_role",
-    "warehouse":"streamlit_wh",
-    "database":"CIG_DB",
-    "schema":"output_cig"
+    "role":"SF_RL_STREAMLIT",
+    "warehouse":"WH_STREAMLIT",
+    "database":"DB_STREAMLIT",
+    "schema":"OUTPUT"
 }
