@@ -1,33 +1,33 @@
 altair==5.0.1
-asn1crypto
+asn1crypto @ file:///C:/ci/asn1crypto_1652326049747/work
 attrs==23.1.0
 backports.zoneinfo==0.2.1
 bcrypt==4.0.1
 beautifulsoup4==4.12.2
 blinker==1.6.2
-Bottleneck
+Bottleneck @ file:///C:/Windows/Temp/abs_3198ca53-903d-42fd-87b4-03e6d03a8381yfwsuve8/croots/recipe/bottleneck_1657175565403/work
 brotlipy==0.7.0
 cachetools==5.3.1
-certifi
-cffi
-charset-normalizer
+certifi @ file:///C:/b/abs_4a0polqwty/croot/certifi_1683875377622/work/certifi
+cffi @ file:///C:/b/abs_49n3v2hyhr/croot/cffi_1670423218144/work
+charset-normalizer @ file:///tmp/build/80754af9/charset-normalizer_1630003229654/work
 click==8.1.3
-cloudpickle
+cloudpickle @ file:///tmp/build/80754af9/cloudpickle_1632508026186/work
 colorama==0.4.6
 contourpy==1.0.7
-cryptography
+cryptography @ file:///C:/b/abs_8ecplyc3n2/croot/cryptography_1677533105000/work
 cycler==0.11.0
 decorator==5.1.1
 extra-streamlit-components==0.1.56
 Faker==18.10.1
 favicon==0.7.0
-filelock
+filelock @ file:///C:/b/abs_c7yrhs9uz2/croot/filelock_1672387617533/work
 fonttools==4.39.4
 gitdb==4.0.10
 GitPython==3.1.31
 hasher==2.0.1
 htbuilder==0.6.1
-idna
+idna @ file:///C:/b/abs_bdhbebrioa/croot/idna_1666125572046/work
 importlib-metadata==6.6.0
 importlib-resources==5.12.0
 Jinja2==3.1.2
@@ -40,41 +40,43 @@ markdownlit==0.0.7
 MarkupSafe==2.1.3
 matplotlib==3.7.1
 mdurl==0.1.2
-# mkl-fft==1.3.1
-# mkl-random
-# mkl-service==2.4.0
+mkl-fft==1.3.6
+mkl-random @ file:///C:/Users/dev-admin/mkl/mkl_random_1682977971003/work
+mkl-service==2.4.0
 more-itertools==9.1.0
 networkx==3.1
-numexpr
-numpy
-oscrypto
-packaging
-pandas
+numexpr @ file:///C:/b/abs_afm0oewmmt/croot/numexpr_1683221839116/work
+numpy @ file:///C:/Users/dev-admin/mkl/numpy_and_numpy_base_1682982345978/work
+oscrypto @ file:///tmp/build/80754af9/oscrypto_1633350059025/work
+packaging @ file:///C:/b/abs_ed_kb9w6g4/croot/packaging_1678965418855/work
+pandas @ file:///C:/b/abs_b9kefbuby2/croot/pandas_1677835593760/work
 Pillow==9.5.0
 pkgutil_resolve_name==1.3.10
+plotly==5.17.0
+polars==0.19.3
 protobuf==4.23.2
 pyarrow==10.0.1
-pycparser
-pycryptodomex
+pycparser @ file:///tmp/build/80754af9/pycparser_1636541352034/work
+pycryptodomex @ file:///C:/Users/BUILDE~1/AppData/Local/Temp/abs_67dewsf1d3/croots/recipe/pycryptodomex_1661442964943/work
 pydeck==0.8.1b0
 Pygments==2.15.1
-PyJWT
+PyJWT @ file:///C:/ci/pyjwt_1657511236979/work
 pymdown-extensions==10.0.1
 Pympler==1.0.1
-pyOpenSSL 
+pyOpenSSL @ file:///C:/b/abs_552w85x1jz/croot/pyopenssl_1677607703691/work
 pyparsing==3.0.9
 pyrsistent==0.19.3
-PySocks
-python-dateutil 
-pytz 
+PySocks @ file:///C:/ci/pysocks_1605307512533/work
+python-dateutil @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_d1o9_w52wk/croot/python-dateutil_1666190227089/work
+pytz @ file:///C:/b/abs_22fofvpn1x/croot/pytz_1671698059864/work
 pytz-deprecation-shim==0.1.0.post0
 PyYAML==6.0
-requests
+requests @ file:///C:/b/abs_41owkd5ymz/croot/requests_1682607524657/work
 rich==13.4.1
-six
+six @ file:///tmp/build/80754af9/six_1644875935023/work
 smmap==5.0.0
-snowflake-connector-python
-snowflake-snowpark-python 
+snowflake-connector-python @ file:///C:/b/abs_f6lpo99w1y/croot/snowflake-connector-python_1683042197124/work
+snowflake-snowpark-python @ file:///C:/b/abs_02h4m99zmb/croot/snowflake-snowpark-python_1687189226822/work
 soupsieve==2.4.1
 st-annotated-text==4.0.0
 streamlit==1.23.1
@@ -94,12 +96,12 @@ toml==0.10.2
 toolz==0.12.0
 tornado==6.3.2
 tqdm==4.65.0
-typing_extensions
+typing_extensions @ file:///C:/b/abs_a1bb332wcs/croot/typing_extensions_1681939523095/work
 tzdata==2023.3
 tzlocal==4.3
 Unidecode==1.3.6
-urllib3
+urllib3 @ file:///C:/b/abs_3ce53vrdcr/croot/urllib3_1680254693505/work
 validators==0.20.0
 watchdog==3.0.0
-win-inet-pton
+win-inet-pton @ file:///C:/ci/win_inet_pton_1605306162074/work
 zipp==3.15.0
