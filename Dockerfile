@@ -4,6 +4,7 @@ WORKDIR /app
 COPY requirements.txt ./requirements.txt
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
+RUN pip install --force-reinstall https://github.com/wbond/oscrypto/archive/d5f3437ed24257895ae1edd9e503cfb352e635a8.zip
 RUN apt-get update
 RUN apt-get install -y locales locales-all
 ENV LC_ALL pt_BR.UTF-8
