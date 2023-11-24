@@ -24,7 +24,7 @@ import datetime
 import locale
 import zipfile #adicionado para atender a demanda de upload de arquivos zipados
 from plot_graficos.graficos import tipo_de_rede, tipo_acomodacao, evolucao_custo_total, evolucao_qtde_atendimento, evolucao_custo_medio
-
+import csv
 # Configurando o ambiente do streamlit
 st.set_page_config(page_title="Aplicação CIG",
                    page_icon="💻",
@@ -32,6 +32,17 @@ st.set_page_config(page_title="Aplicação CIG",
                    initial_sidebar_state="auto")
 
 locale.setlocale(locale.LC_NUMERIC, 'pt_BR')
+
+def read_csv_multiple_enconding_sep(file_path):
+    encodings = ['utf-8', 'windows-1252']
+    for encoding in encodings:
+        try:
+            df = pd.read_csv(file_path, sep=None, dtype={'COD_PREST': str}, nrows=5, encoding=encoding)
+            return df
+        except UnicodeDecodeError:
+            continue
+    # If no encoding or separator worked, raise an exception or return None
+    raise Exception("Unable to decode the file with any of the specified encodings and separators")
 
 # Função para exibir a seção de login.
 def check_timeout():
@@ -166,7 +177,8 @@ elif 'connection_established' in st.session_state:
                                         # Extract the file
                                         with zip_file.open(file_name) as csv_file:
                                             # Read the CSV file into a DataFrame
-                                            df = pd.read_csv(csv_file, sep=',', dtype={'COD_PREST': str}, on_bad_lines='skip')#adicionei isso para rodar os testes, o que fazer quando tiver linhas com numeros diferentes de colunas
+                                            #df = pd.read_csv(csv_file, sep=',', dtype={'COD_PREST': str}, on_bad_lines='skip')#adicionei isso para rodar os testes, o que fazer quando tiver linhas com numeros diferentes de colunas
+                                            df = read_csv_multiple_enconding_sep(csv_file)
                                             # Append the DataFrame to the list
                                             dataframes.append(df)
 
@@ -180,7 +192,8 @@ elif 'connection_established' in st.session_state:
                             # Carrega os dados em um DataFrame
 
                             ###Criar validação para checar o separador
-                            df = pd.read_csv(uploaded_file, sep=',', dtype={'COD_PREST': str}, on_bad_lines='skip')
+                            #df = pd.read_csv(uploaded_file, sep=',', dtype={'COD_PREST': str}, on_bad_lines='skip')
+                            df = read_csv_multiple_enconding_sep(uploaded_file)
                         if df is not None:
                             df = df.loc[:, ~df.columns.str.contains('Unnamed: 0')]
                             
@@ -192,39 +205,40 @@ elif 'connection_established' in st.session_state:
                             Mode = 'Append'
                             # Botão 'Upload' para carregar os dados para o Snowflake
                             if st.button('Upload'):
-                                #valida_complitude
-                                validacao_complitude = checa_completude(df)
-                                validacao_preliminar = validation_rules_DataFrame(df)
-                                if len(validacao_complitude) > 0:
-                                    error_message = "Arquivo com muitos linhas vazias nas colunas:  \n"
-                                    for coluna in validacao_complitude:
-                                        error_message += coluna[0] + ': ' + str(coluna[1]*100) + '\%'+' de linhas preenchidas. Minimo aceitavel : ' + str(coluna[2]*100) + '\%' + '  \n'
-                                    st.error(error_message)
-                                #valida_complitude
-                                elif validation_rules_DataFrame(df) is not None:
-                                     st.error(validacao_preliminar)
-                                # if 1 < 0 :
-                                #     print('Apagar isso e tirar o comentario das validações')
-                                # Obtém as informações do usuário para conexão ao Snowflake
-                                #checa se a ultima vez que essa cnpj rodou
-                                timeout_left = check_timeout() 
-                                if timeout_left > 0: 
-                                    st.error('Faltam ' + timeout_left + ' minutos para liberar novo processamento.')
-                                else:
-                                    user = dados_snow('admin')
-                                    # Estabelece a sessão de conexão com o Snowflake
-                                    session = connection(user)
-                                    # atualiza_tabela_usuario()
-                                    # Carrega os dados para o Snowflake
-                                    target_table = 'INPUT_'+st.session_state['cliente'][0][0]+'_'+datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
-                                    uploadToSnowflake(df=df,
-                                                        session = session,
-                                                        outputTableName = target_table,
-                                                        database = 'DB_STREAMLIT',
-                                                        schema = 'RAW_INPUT',
-                                                        temporary=True)
-                                    st.success("Arquivo carregado com sucesso!")
-                                    send_email_to_unimed(session)
+                                with st.spinner('Por favor, aguarde...'):
+                                    #valida_complitude
+                                    #validacao_complitude = checa_completude(df)
+                                    #validacao_preliminar = validation_rules_DataFrame(df)
+                                    #if len(validacao_complitude) > 0:
+                                    #     error_message = "Arquivo com muitos linhas vazias nas colunas:  \n"
+                                    #     for coluna in validacao_complitude:
+                                    #         error_message += coluna[0] + ': ' + str(coluna[1]*100) + '\%'+' de linhas preenchidas. Minimo aceitavel : ' + str(coluna[2]*100) + '\%' + '  \n'
+                                    #     st.error(error_message)
+                                    # #valida_complitude
+                                    # elif validation_rules_DataFrame(df) is not None:
+                                    #      st.error(validacao_preliminar)
+                                    # if 1 < 0 :
+                                    #     print('Apagar isso e tirar o comentario das validações')
+                                    # Obtém as informações do usuário para conexão ao Snowflake
+                                    #checa se a ultima vez que essa cnpj rodou
+                                    timeout_left = check_timeout() 
+                                    if timeout_left > 0: 
+                                        st.error('Faltam ' + timeout_left + ' minutos para liberar novo processamento.')
+                                    else:
+                                        user = dados_snow('admin')
+                                        # Estabelece a sessão de conexão com o Snowflake
+                                        session = connection(user)
+                                        # atualiza_tabela_usuario()
+                                        # Carrega os dados para o Snowflake
+                                        target_table = 'INPUT_'+st.session_state['cliente'][0][0]+'_'+datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
+                                        uploadToSnowflake(df=df,
+                                                            session = session,
+                                                            outputTableName = target_table,
+                                                            database = 'DB_STREAMLIT',
+                                                            schema = 'RAW_INPUT',
+                                                            temporary=True)
+                                        st.success("Arquivo carregado com sucesso!")
+                                        send_email_to_unimed(session)
 
                 elif pagina_selecionada == 'Consulta':
                     st.success("Aqui está os dados: ")
@@ -233,22 +247,24 @@ elif 'connection_established' in st.session_state:
                     st.write(st.session_state['login_name'][0][0])
                     session = connection(user)
                     cliente = st.session_state['cliente'][0][0]
-                    df = consulta_snow(session,cliente)
-                    st.dataframe(df.head(10))
-                    st.download_button(
-                            label='Download output1',
-                            data=df.to_csv().encode('utf-8'),
-                            file_name='data_frame.csv',
-                            mime='text/csv'
-                            )
-                    df = consulta_snow2(session,cliente)
-                    st.dataframe(df.head(10)) 
-                    st.download_button(
-                            label='Download output2',
-                            data=df.to_csv().encode('utf-8'),
-                            file_name='data_frame_2.csv',
-                            mime='text/csv'
-                            )
+                    with st.spinner('Carregando output 1. Por favor, aguarde...'):
+                        df = consulta_snow(session,cliente)
+                        st.dataframe(df.head(10))
+                        st.download_button(
+                                label='Download output1',
+                                data=df.to_csv().encode('utf-8'),
+                                file_name='data_frame.csv',
+                                mime='text/csv'
+                                )
+                    with st.spinner('Carregando output 2. Por favor, aguarde...'):
+                        df = consulta_snow2(session,cliente)
+                        st.dataframe(df.head(10)) 
+                        st.download_button(
+                                label='Download output2',
+                                data=df.to_csv().encode('utf-8'),
+                                file_name='data_frame_2.csv',
+                                mime='text/csv'
+                                )
                 elif pagina_selecionada == 'Gráficos':
                     tabelas = session_login.sql('SHOW TABLES;').collect()
                     tabelas = tabelas[:]
@@ -264,7 +280,8 @@ elif 'connection_established' in st.session_state:
                     user = dados_snow('report')
                     session = connection_report(user)
 
-                    dados = load_data(session, option)
+                    with st.spinner('Por favor, aguarde...'):
+                        dados = load_data(session, option)
 
                     dados = dados.with_columns(
                         pl.col('DATA_SAIDA').map_elements(lambda x: x.replace(' ', '-'))
@@ -290,7 +307,7 @@ elif 'connection_established' in st.session_state:
 
                     col1, col2, col3 = st.columns(3)
                     with col1:
-                        st.image('img\Logo-Faculdade Unimed-1.png')
+                        st.image('./img/Logo-Faculdade Unimed-1.png')
                     with col2:
                         st.markdown("<h1 style='text-align: center; color: black;'>Paronama Geral CIG</h1>", unsafe_allow_html=True)
                     
