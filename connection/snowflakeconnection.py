@@ -125,7 +125,7 @@ def verif_insert_table(df : pd.DataFrame,
         print(session.sql(f"""SELECT COUNT(*) AS LineCount FROM {database}.{schema}.{outputTableName};""").collect())
         
 def consulta_snow(session : Session, cliente):
-    query = f"""SELECT * FROM UNIMED_STREAMLIT_SF.STATA.AMOSTRA_RETORNO WHERE CLIENTE = '{cliente}'"""
+    query = f"""SELECT * FROM UNIMED_STREAMLIT_SF.STATA.AMOSTRA_RETORNO limit 100"""
     value = pd.DataFrame(session.sql(query).collect())
 
     return value

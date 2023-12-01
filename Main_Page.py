@@ -21,7 +21,7 @@ import locale
 from plot_graficos.graficos import tipo_de_rede, tipo_acomodacao, evolucao_custo_total, evolucao_qtde_atendimento, evolucao_custo_medio
 
 # Configurando o ambiente do streamlit
-st.set_page_config(page_title="Aplicação CIG",
+st.set_page_config(page_title="Aplicação",
                    page_icon="💻",
                    layout="wide",
                    initial_sidebar_state="auto")
@@ -64,7 +64,7 @@ def load_data(_session, tabela):
     # cliente = st.session_state['name']
     snow_df = _session.table(tabela)
     pl_df = pl.from_pandas(snow_df.to_pandas())
-    return pl_df
+    return pl_df.head(100)
 
 
 def login(session_login):
@@ -150,6 +150,7 @@ elif 'connection_established' in st.session_state:
                             ###Criar validação para checar o separador
                             df = pd.read_csv(uploaded_file, sep=',', dtype={'COD_PREST': str})
                             df = df.loc[:, ~df.columns.str.contains('Unnamed: 0')]
+                            df = df.head(100)
                             df['CLIENTE'] = st.session_state['cliente'][0][0]
 
                             st.dataframe(df.head(10))
@@ -214,7 +215,6 @@ elif 'connection_established' in st.session_state:
                     
                     user = dados_snow('report')
                     session = connection_report(user)
-
                     dados = load_data(session, option)
 
                     dados = dados.with_columns(
@@ -240,11 +240,6 @@ elif 'connection_established' in st.session_state:
                                 )
 
                     col1, col2, col3 = st.columns(3)
-                    with col1:
-                        st.image('img\Logo-Faculdade Unimed-1.png')
-                    with col2:
-                        st.markdown("<h1 style='text-align: center; color: black;'>Paronama Geral CIG</h1>", unsafe_allow_html=True)
-                    
 
                     filtro_ano= st.multiselect(
                         label="Filtro para a coluna Ano",
